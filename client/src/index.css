@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+html { scroll-behavior: smooth; }
+
+section { scroll-margin-top: 80px; }
+html { scroll-behavior: smooth; }
+[id] { scroll-margin-top: 80px; }
+
+@media (max-width: 767px) {
+  section { scroll-margin-top: 96px; } 
+}
+body.scrolled .Container-Header {
+  background: rgba(0,0,0,0.7);  
+  backdrop-filter: blur(12px);
+}

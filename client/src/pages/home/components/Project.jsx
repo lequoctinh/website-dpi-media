@@ -1,0 +1,241 @@
+import React, { useEffect, useMemo, useState } from "react";
+
+// ========== Helpers ==========
+const API_BASE = "http://localhost:5000";
+const extractVideoId = (url) => {
+if (!url) return null;
+const m =
+    url.match(/(?:youtube\.com\/.*(?:v=|\/v\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i) ||
+    url.match(/[?&]v=([A-Za-z0-9_-]{6,})/i);
+return m ? m[1] : null;
+};
+
+const VideoPoster = ({ video }) => {
+const id = video.video_id || extractVideoId(video.youtube_url);
+const poster =
+    video.poster ? `${API_BASE}${video.poster}` : id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+return (
+    <img
+    src={poster}
+    alt={video.title || "Poster"}
+    loading="lazy"
+    className="h-64 w-full rounded-xl object-cover md:h-56 lg:h-60"
+    />
+);
+};
+
+// ========== Component ==========
+export default function Project() {
+const [categories, setCategories] = useState([]);
+const [selectedCat, setSelectedCat] = useState(null);
+
+const [videos, setVideos] = useState([]);
+const [loading, setLoading] = useState(false);
+const [err, setErr] = useState("");
+
+const [selectedVideo, setSelectedVideo] = useState(null);
+
+// pagination
+const perPage = 6;
+const [page, setPage] = useState(1);
+const totalPages = Math.max(1, Math.ceil(videos.length / perPage));
+const paged = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return videos.slice(start, start + perPage);
+}, [videos, page]);
+
+// fetch categories
+useEffect(() => {
+    let mounted = true;
+    fetch(`${API_BASE}/api/category`)
+    .then((r) => r.ok ? r.json() : Promise.reject(r))
+    .then((data) => mounted && setCategories(data || []))
+    .catch(() => mounted && setCategories([]));
+    return () => (mounted = false);
+}, []);
+
+// fetch videos by category
+useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setErr("");
+    const url = selectedCat
+    ? `${API_BASE}/api/video-projeck?category_id=${selectedCat}`
+    : `${API_BASE}/api/video-projeck`;
+    fetch(url)
+    .then((r) => r.ok ? r.json() : Promise.reject(r))
+    .then((data) => {
+        if (!mounted) return;
+        setVideos(Array.isArray(data) ? data : []);
+        setPage(1);
+    })
+    .catch(() => mounted && setErr("Không tải được danh sách dự án."))
+    .finally(() => mounted && setLoading(false));
+    return () => (mounted = false);
+}, [selectedCat]);
+
+const openVideo = (v) => setSelectedVideo(v);
+const closeVideo = () => setSelectedVideo(null);
+
+return (
+    <section id="projects" aria-labelledby="projects-heading" className="relative bg-black">
+    <div className="mx-auto max-w-7xl px-4 py-16 md:py-20">
+        {/* Header */}
+        <header className="mx-auto mb-8 max-w-3xl text-center">
+        <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+            Portfolio
+        </p>
+        <h2 id="projects-heading" className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
+            Dự án của <span className="text-white/70">DPI Media</span>
+        </h2>
+        <p className="mt-3 text-white/70">Chọn danh mục để xem các showreel, TVC, social video… đã thực hiện.</p>
+        </header>
+
+        {/* Category filter */}
+        <nav aria-label="Lọc danh mục dự án" className="mb-8 flex flex-wrap items-center justify-center gap-2">
+        <FilterButton active={!selectedCat} onClick={() => setSelectedCat(null)} label="Tất cả" />
+        {categories.map((c) => (
+            <FilterButton key={c.id} active={selectedCat === c.id} onClick={() => setSelectedCat(c.id)} label={c.name} />
+        ))}
+        </nav>
+
+        {/* Grid / States */}
+        <div className="relative">
+        {loading && (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: perPage }).map((_, i) => (
+                <li key={i} className="animate-pulse">
+                <div className="h-60 w-full rounded-xl bg-white/10" />
+                <div className="mt-3 h-6 w-3/4 rounded bg-white/10" />
+                </li>
+            ))}
+            </ul>
+        )}
+
+        {!loading && err && (
+            <p className="rounded-xl border border-white/10 bg-white/5 p-6 text-center text-white/80">{err}</p>
+        )}
+
+        {!loading && !err && paged.length === 0 && (
+            <p className="rounded-xl border border-white/10 bg-white/5 p-6 text-center text-white/80">
+            Hiện chưa có video trong danh mục này.
+            </p>
+        )}
+
+        {!loading && !err && paged.length > 0 && (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {paged.map((v, idx) => (
+                <li key={idx}>
+                <article className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-2 transition hover:bg-white/[0.05]">
+                    <button
+                    type="button"
+                    onClick={() => openVideo(v)}
+                    className="block w-full text-left focus:outline-none"
+                    aria-label={`Mở video ${v.title}`}
+                    >
+                    <div className="relative overflow-hidden rounded-xl">
+                        <VideoPoster video={v} />
+                        <span className="pointer-events-none absolute inset-0 rounded-xl">
+                        <span className="absolute -left-1/3 top-0 h-full w-1/3 -skew-x-12 bg-white/15 opacity-0 transition duration-700 group-hover:translate-x-[220%] group-hover:opacity-100" />
+                        </span>
+                        <h3 className="absolute left-3 right-3 top-3 line-clamp-2 text-lg font-semibold text-white drop-shadow">
+                        {v.title}
+                        </h3>
+                    </div>
+                    {v.category_name && <p className="mt-3 text-sm text-white/60">{v.category_name}</p>}
+                    </button>
+                </article>
+                </li>
+            ))}
+            </ul>
+        )}
+        </div>
+
+        {/* Pagination */}
+        {!loading && !err && videos.length > perPage && (
+        <nav aria-label="Phân trang dự án" className="mt-8 flex items-center justify-center gap-2">
+            <PageBtn disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>«</PageBtn>
+            {Array.from({ length: totalPages }, (_, i) => (
+            <PageBtn key={i} active={page === i + 1} onClick={() => setPage(i + 1)}>{i + 1}</PageBtn>
+            ))}
+            <PageBtn disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>»</PageBtn>
+        </nav>
+        )}
+
+        {/* Modal */}
+        {selectedVideo && (
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedVideo.title}
+            className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4"
+            onClick={closeVideo}
+        >
+            <div
+            className="relative h-[80vh] w-[92vw] max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            >
+            <button
+                aria-label="Đóng"
+                className="absolute right-3 top-3 z-10 rounded-full bg-white/10 p-2 text-white backdrop-blur hover:bg-white/20"
+                onClick={closeVideo}
+            >
+                ✕
+            </button>
+            <iframe
+                title={selectedVideo.title}
+                className="h-full w-full"
+                src={`https://www.youtube-nocookie.com/embed/${
+                selectedVideo.video_id || extractVideoId(selectedVideo.youtube_url)
+                }?autoplay=1&modestbranding=1&rel=0&playsinline=1`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+            />
+            </div>
+        </div>
+        )}
+    </div>
+    </section>
+);
+}
+
+// ========== UI bits ==========
+function FilterButton({ active, onClick, label }) {
+return (
+    <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={[
+        "rounded-full border px-4 py-2 text-sm font-medium transition focus:outline-none",
+        active
+        ? "border-transparent bg-gradient-to-r from-rose-500 to-orange-500 text-white"
+        : "border-white/20 bg-white/5 text-white/80 hover:bg-white/10",
+    ].join(" ")}
+    >
+    {label}
+    </button>
+);
+}
+
+function PageBtn({ active, disabled, onClick, children }) {
+return (
+    <button
+    type="button"
+    disabled={disabled}
+    onClick={onClick}
+    className={[
+        "min-w-9 rounded-md border px-3 py-2 text-sm font-semibold transition",
+        disabled
+        ? "cursor-not-allowed border-white/10 text-white/30"
+        : active
+        ? "border-transparent bg-gradient-to-r from-rose-500 to-orange-500 text-white"
+        : "border-white/15 bg-white/5 text-white/80 hover:bg-white/10",
+    ].join(" ")}
+    >
+    {children}
+    </button>
+);
+}
