@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const mysql = require("mysql2");
 
-// Kết nối database
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -10,7 +9,6 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
-// GET all or by category
 router.get("/", (req, res) => {
   const { category_id } = req.query;
   let query = `SELECT * FROM videoprojeck`;
@@ -24,12 +22,11 @@ router.get("/", (req, res) => {
   query += ` ORDER BY created_at DESC`;
 
   db.query(query, params, (err, results) => {
-    if (err) return res.status(500).json({ error: err });
+    if (err) return res.status(500).json({ error: err }); 
     res.json(results);
   });
 });
 
-// GET 1 video by ID
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   db.query("SELECT * FROM videoprojeck WHERE id = ?", [id], (err, results) => {
@@ -39,7 +36,6 @@ router.get("/:id", (req, res) => {
   });
 });
 
-// POST - Thêm video
 router.post("/", (req, res) => {
   const { title, youtube_url, video_id, poster, category_id } = req.body;
   const query = `
@@ -52,7 +48,6 @@ router.post("/", (req, res) => {
   });
 });
 
-// PUT - Cập nhật video
 router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { title, youtube_url, video_id, poster, category_id } = req.body;
@@ -67,7 +62,6 @@ router.put("/:id", (req, res) => {
   });
 });
 
-// DELETE - Xoá video
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   db.query("DELETE FROM videoprojeck WHERE id = ?", [id], (err, result) => {

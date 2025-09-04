@@ -1,20 +1,18 @@
-// src/layouts/index.jsx
+import React from "react";
 import { useMediaQuery } from "react-responsive";
+import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import HeaderMobile from "./HeaderMobile";
-import Footer from "./Footer";
 
-export default function Layout({ children }) {
+export default function Layout() {
 const isMobile = useMediaQuery({ maxWidth: 767 });
 
 return (
     <>
     {isMobile ? <HeaderMobile /> : <Header />}
-    <main className="pt-20"> 
-        {children}
+    <main>
+        <Outlet />
     </main>
-
-    <Footer />
     </>
 );
 }

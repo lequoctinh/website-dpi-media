@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const mysql = require("mysql2/promise"); // ✅ Dùng promise API
-const bcrypt = require("bcrypt");
+const mysql = require("mysql2/promise");
 
-// ✅ Kết nối sử dụng Promise Pool
+// Pool dùng chung
 const db = mysql.createPool({
 host: process.env.DB_HOST || "localhost",
 user: process.env.DB_USER || "root",
@@ -11,26 +10,27 @@ password: process.env.DB_PASSWORD || "",
 database: process.env.DB_NAME || "mediatp",
 });
 
-
+// GET /api/admin/stats
 router.get("/stats", async (req, res) => {
-try {
-    const [videoRes] = await db.query("SELECT COUNT(*) as count FROM videos");
-    const [videoProjeckRes] = await db.query("SELECT COUNT(*) as count FROM videoprojeck");
-    const [categoryRes] = await db.query("SELECT COUNT(*) as count FROM category");
-    const [backstageRes] = await db.query("SELECT COUNT(*) as count FROM backstage");
-    const [partnerRes] = await db.query("SELECT COUNT(*) as count FROM partners");
+    try {
+        const [videoProjeckRes, categoryRes, backstageRes, contactRes] = await Promise.all([
+        db.query("SELECT COUNT(*) AS count FROM `videoprojeck`"),
+        db.query("SELECT COUNT(*) AS count FROM `category`"),
+        db.query("SELECT COUNT(*) AS count FROM `backstage`"),
+        db.query("SELECT COUNT(*) AS count FROM `contacts`"), // 👈 thêm
+        ]);
 
-    res.json({
-    videoCount: videoRes[0].count,
-    videoProjeckCount: videoProjeckRes[0].count,
-    categoryCount: categoryRes[0].count,
-    backstageCount: backstageRes[0].count,
-    partnerCount: partnerRes[0].count,
-    });
-} catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Lỗi lấy thống kê" });
-}
+        res.json({
+        videoProjeckCount: Number(videoProjeckRes[0][0]?.count || 0),
+        categoryCount: Number(categoryRes[0][0]?.count || 0),
+        backstageCount: Number(backstageRes[0][0]?.count || 0),
+        contactCount: Number(contactRes[0][0]?.count || 0),   // 👈 thêm
+        updatedAt: new Date().toISOString(),
+        });
+    } catch (err) {
+        console.error("GET /admin/stats error:", err);
+        res.status(500).json({ error: "Lỗi lấy thống kê" });
+    }
 });
 
 module.exports = router;
