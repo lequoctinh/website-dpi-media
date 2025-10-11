@@ -3,14 +3,15 @@ import { motion } from "framer-motion";
 
 // danh sách logo
 const logos = [
+{ src: "/partner/ACHAU.png", alt: "Á Châu" },
 { src: "/partner/ANCUONG.png", alt: "An Cường" },
 { src: "/partner/Bosch_logo.png", alt: "Bosch" },
-{ src: "/partner/estudio-logo.png", alt: "F.Studio" },
-{ src: "/partner/hyundai-logo.png", alt: "Hyundai" },
-{ src: "/partner/hubert-logo.png", alt: "Hubert" },
-{ src: "/partner/Pima-logo.png", alt: "PIMA" },
+{ src: "/partner/FStudio.png", alt: "F.Studio" },
+{ src: "/partner/Hyundai.png", alt: "Hyundai" },
+{ src: "/partner/logo-H.png HUBERT.png", alt: "Hubert" },
+{ src: "/partner/PIMA.png", alt: "PIMA" },
 { src: "/partner/SHARP.png", alt: "SHARP" },
-{ src: "/partner/skinpen-logo.png", alt: "SkinPen" },
+{ src: "/partner/SkinPen.png", alt: "SkinPen" },
 ];
 
 export default function Partner() {
@@ -27,12 +28,7 @@ return (
         </div>
 
         {/* Banner container */}
-        <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] shadow-[0_8px_30px_rgba(0,0,0,0.35)] overflow-hidden py-6">
-        {/* Fade mask 2 bên cho mượt */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-black to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-black to-transparent" />
-
-        {/* Slider logo */}
+        <div className="relative rounded-2xl border border-white/10 bg-[rgba(111,108,108,0.25)] shadow-[0_8px_30px_rgba(0,0,0,0.35)] overflow-hidden py-6">
         <motion.div
             className="flex gap-16"
             animate={{ x: ["0%", "-100%"] }}

@@ -117,13 +117,13 @@ return (
 
                 <div className="mt-5 flex flex-wrap items-center gap-3">
                     <a
-                    href="#portfolio"
+                    href="#du-an"
                     className="rounded-2xl bg-white/10 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15"
                     >
                     Dự án tiêu biểu
                     </a>
                     <a
-                    href="#contact"
+                    href="#lien-he"
                     className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 ring-1 ring-white/20 hover:shadow"
                     >
                     Nhận báo giá nhanh
