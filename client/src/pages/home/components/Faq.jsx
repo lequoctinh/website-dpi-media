@@ -2,6 +2,14 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const QA = [
+    {
+    q: "DPI?",
+    a: "DPI = Digital Performance & Innovation",
+    b:"Digital – Số hóa: Đại diện cho lĩnh vực truyền thông, sản xuất nội dung số (media, video, ảnh, quảng cáo...)",
+    c:"Performance – Hiệu quả: Cam kết tạo ra sản phẩm đạt chất lượng và hiệu quả truyền thông cao nhất cho khách hàng",
+    d:"Innovation – Đổi mới: Tư duy sáng tạo, liên tục cập nhật xu hướng, công nghệ và giải pháp mới trong ngành"
+
+},
 {
     q: "DPI Media cung cấp những dịch vụ nào?",
     a: "Chúng tôi sản xuất TVC, social video, 3D/Animation, VFX, livestream sự kiện, OOH và trọn gói từ tiền kỳ—hậu kỳ."
@@ -16,7 +24,7 @@ const QA = [
 },
 {
     q: "DPI có hỗ trợ kịch bản & storyboard không?",
-    a: "Có. Creative team hỗ trợ strategy, kịch bản, storyboard/moodboard để thống nhất hình ảnh và thông điệp trước khi quay/dựng."
+    a: "Có Creative team hỗ trợ strategy, kịch bản, storyboard/moodboard để thống nhất hình ảnh và thông điệp trước khi quay/dựng."
 },
 {
     q: "Quy trình làm việc của DPI như thế nào?",
@@ -24,7 +32,7 @@ const QA = [
 },
 {
     q: "Có thể làm trong ngân sách cố định không?",
-    a: "Có. Chúng tôi tối ưu nguồn lực theo ngân sách, nhưng vẫn giữ tiêu chuẩn chất lượng & đúng deadline."
+    a: "Chúng tôi tối ưu nguồn lực theo ngân sách, nhưng vẫn giữ tiêu chuẩn chất lượng & đúng deadline."
 }
 ];
 
@@ -38,10 +46,10 @@ const toggle = (idx) => setOpen((s) => (s === idx ? null : idx));
 const faqSchema = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": QA.map(({ q, a }) => ({
+    "mainEntity": QA.map(({ q, a, b, c , d }) => ({
     "@type": "Question",
     "name": q,
-    "acceptedAnswer": { "@type": "Answer", "text": a }
+    "acceptedAnswer": { "@type": "Answer", "text": a, b, c, d }
     }))
 }), []);
 
@@ -88,6 +96,9 @@ return (
                 >
                 <div className="min-h-0 overflow-hidden">
                     <p className="px-4 pb-4 text-white/80">{item.a}</p>
+                    <p className="px-4 pb-4 text-white/80">{item.b}</p>
+                    <p className="px-4 pb-4 text-white/80">{item.c}</p>
+                    <p className="px-4 pb-4 text-white/80">{item.d}</p>
                 </div>
                 </div>
             </li>

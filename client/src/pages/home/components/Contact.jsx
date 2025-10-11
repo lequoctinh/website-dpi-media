@@ -170,7 +170,7 @@ return (
         </div>
 
         {/* copyright nhỏ cho section */}
-        <p className="mt-8 text-center text-xs text-white/50">© Copyright by DPI MEDIA 2025</p>
+        <p className="mt-8 text-center text-xs text-white/50">© Copyright by DPI MEDIA</p>
     </div>  
     </section>
 );
