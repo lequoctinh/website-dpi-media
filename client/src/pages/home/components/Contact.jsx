@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const API_BASE =
-import.meta.env?.VITE_API_BASE?.replace(/\/$/, "") || "http://localhost:5000";
-
+const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
 export default function Contact() {
 const [email, setEmail] = useState("");
 const [status, setStatus] = useState({ type: "", msg: "" });
@@ -168,8 +166,6 @@ return (
             />
         </div>
         </div>
-
-        {/* copyright nhỏ cho section */}
         <p className="mt-8 text-center text-xs text-white/50">© Copyright by DPI MEDIA</p>
     </div>  
     </section>

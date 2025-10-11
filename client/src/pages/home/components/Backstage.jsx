@@ -4,7 +4,9 @@ import { Autoplay } from "swiper/modules";
 import axios from "axios";
 import "swiper/css";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE || "").replace(/\/+$/, "");
+
 
 export default function Backstage() {
 const [items, setItems] = useState([]);
@@ -21,8 +23,7 @@ useEffect(() => {
 
 useEffect(() => {
     let mounted = true;
-    axios
-    .get(`${API_BASE}/api/backstage`)
+    axios.get(`${API_BASE}/backstage`)
     .then((res) => {
         if (mounted) setItems(Array.isArray(res.data) ? res.data : []);
     })
@@ -83,9 +84,9 @@ return (
                 className="!w-[320px] md:!w-[360px] lg:!w-[400px]"
                 >
                 <BackstageCard
-                    src={`${API_BASE}${it.img}`}
+                    src={`${ASSET_BASE}${it.img}`} 
                     alt={it.name || `Behind ${i + 1}`}
-                />
+                    />
                 </SwiperSlide>
             ))}
             </Swiper>

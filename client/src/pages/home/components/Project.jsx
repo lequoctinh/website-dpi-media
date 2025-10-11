@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-// ========== Helpers ==========
-const API_BASE = "http://localhost:5000";
+// ======= Config from env =======
+const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
+const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE || "").replace(/\/+$/, "");
+
+// ======= Helpers =======
 const extractVideoId = (url) => {
 if (!url) return null;
 const m =
@@ -10,10 +13,16 @@ const m =
 return m ? m[1] : null;
 };
 
+const joinAsset = (p) => {
+if (!p) return "";
+if (/^https?:\/\//i.test(p)) return p;
+const path = String(p).startsWith("/") ? p : `/${p}`;
+return `${ASSET_BASE}${path}`;
+};
+
 const VideoPoster = ({ video }) => {
 const id = video.video_id || extractVideoId(video.youtube_url);
-const poster =
-    video.poster ? `${API_BASE}${video.poster}` : id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+const poster = video.poster ? joinAsset(video.poster) : id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
 return (
     <img
     src={poster}
@@ -24,7 +33,7 @@ return (
 );
 };
 
-// ========== Component ==========
+// ======= Component =======
 export default function Project() {
 const [categories, setCategories] = useState([]);
 const [selectedCat, setSelectedCat] = useState(null);
@@ -47,8 +56,8 @@ const paged = useMemo(() => {
 // fetch categories
 useEffect(() => {
     let mounted = true;
-    fetch(`${API_BASE}/api/category`)
-    .then((r) => r.ok ? r.json() : Promise.reject(r))
+    fetch(`${API_BASE}/category`)
+    .then((r) => (r.ok ? r.json() : Promise.reject(r)))
     .then((data) => mounted && setCategories(data || []))
     .catch(() => mounted && setCategories([]));
     return () => (mounted = false);
@@ -59,11 +68,13 @@ useEffect(() => {
     let mounted = true;
     setLoading(true);
     setErr("");
+
     const url = selectedCat
-    ? `${API_BASE}/api/video-projeck?category_id=${selectedCat}`
-    : `${API_BASE}/api/video-projeck`;
+    ? `${API_BASE}/video-projeck?category_id=${selectedCat}`
+    : `${API_BASE}/video-projeck`;
+
     fetch(url)
-    .then((r) => r.ok ? r.json() : Promise.reject(r))
+    .then((r) => (r.ok ? r.json() : Promise.reject(r)))
     .then((data) => {
         if (!mounted) return;
         setVideos(Array.isArray(data) ? data : []);
@@ -71,6 +82,7 @@ useEffect(() => {
     })
     .catch(() => mounted && setErr("Không tải được danh sách dự án."))
     .finally(() => mounted && setLoading(false));
+
     return () => (mounted = false);
 }, [selectedCat]);
 
@@ -201,7 +213,7 @@ return (
 );
 }
 
-// ========== UI bits ==========
+// ======= UI bits =======
 function FilterButton({ active, onClick, label }) {
 return (
     <button

@@ -7,27 +7,40 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 
 const app = express();
 
-/* ---------------- Security & core middlewares ---------------- */
-app.use(helmet());
-app.use(express.json());
+/* ---------------- Core & Security ---------------- */
+app.set("trust proxy", 1); // đứng sau Nginx để lấy IP client đúng
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+app.use(compression());
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
-// CORS: bắt buộc chỉ định origin cụ thể khi dùng cookie httpOnly
+// CORS: whitelist domain production + localhost (dev)
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  "http://dpistudio.vn",
+  "https://dpistudio.vn",
+];
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: ALLOWED_ORIGINS,
     credentials: true,
   })
 );
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+// Rate limit cho toàn bộ prefix /api
 app.use(
   "/api",
   rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 15 * 60 * 1000, // 15 phút
     limit: 300,
     standardHeaders: true,
     legacyHeaders: false,
@@ -39,22 +52,24 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/images", express.static(path.join(__dirname, "public")));
 
 /* ---------------- Routes ---------------- */
-// import đúng theo tên file trong /routes của bạn
+// Import đúng theo tên file trong /routes của bạn
 const adminRoutes = require("./routes/admin");
 const adminAuthRoutes = require("./routes/adminAuth");
 const backstageRoutes = require("./routes/backstage");
 const emailRoutes = require("./routes/emailRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
-const videoProjeckRoutes = require("./routes/videoProjeckRoutes"); 
+const videoProjeckRoutes = require("./routes/videoProjeckRoutes");
 const uploadPosterRoute = require("./routes/uploadPosterRoute");
 const contactRoutes = require("./routes/contactRoutes");
 const adminContactsRoutes = require("./routes/adminContacts");
 
+// Auth
 app.use("/api/admin/auth", adminAuthRoutes);
 
+// Admin
 app.use("/api/admin", adminRoutes);
 
-// Business routes
+// Business
 app.use("/api/backstage", backstageRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/category", categoryRoutes);
@@ -63,14 +78,29 @@ app.use("/api/upload-poster", uploadPosterRoute);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/admin/contacts", adminContactsRoutes);
 
-app.get("/health", (_req, res) => res.json({ ok: true }));
+/* ---------------- Health check ---------------- */
+// Cho phép kiểm tra trực tiếp (port 3001) và qua Nginx (/api/health)
+app.get(["/health", "/api/health"], (_req, res) => res.json({ ok: true }));
 
-app.use((req, res) => {
+/* ---------------- 404 & Error handler ---------------- */
+app.use((req, res, next) => {
+  if (res.headersSent) return next();
   res.status(404).json({ error: "Not Found" });
 });
 
-const PORT = process.env.PORT || 5000;
+// Handler lỗi tập trung (đảm bảo không lộ stack ở prod)
+app.use((err, _req, res, _next) => {
+  console.error("[ERROR]", err);
+  res.status(err.status || 500).json({
+    error: "Internal Server Error",
+  });
+});
+
+/* ---------------- Start server ---------------- */
+const PORT = process.env.PORT || 3001; // .env của bạn đang PORT=3001
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`CORS origin = ${process.env.CLIENT_ORIGIN || "http://localhost:5173"}`);
+  console.log(
+    `CORS origins: ${ALLOWED_ORIGINS.join(", ")}`
+  );
 });
