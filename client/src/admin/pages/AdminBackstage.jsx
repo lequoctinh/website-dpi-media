@@ -1,16 +1,13 @@
-// FILE: src/admin/pages/AdminBackstage.jsx
+
 import React, { useEffect, useRef, useState } from "react";
-import { api } from "../lib/api";              // axios instance (baseURL = VITE_API_BASE)
+import { api } from "../lib/api";            
 import toast, { Toaster } from "react-hot-toast";
 
-/** BASES
- *  - API_BASE:   dùng cho axios (đã nằm trong api instance)
- *  - ASSET_BASE: dùng để prefix ảnh/static như /images, /uploads (không nằm dưới /api)
- */
+
 const API_BASE   = (import.meta.env.VITE_API_BASE || "").replace(/\/+$/, "");
 const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE || API_BASE.replace(/\/api$/, "")).replace(/\/+$/, "");
 
-/** prefix URL ảnh nếu là đường dẫn tương đối kiểu /images/backstage/xxx.jpg */
+
 const toImgUrl = (p) => {
 if (!p) return "";
 if (/^https?:\/\//i.test(p) || p.startsWith("//")) return p;
@@ -22,14 +19,14 @@ const [items, setItems] = useState([]);
 const [loading, setLoading] = useState(true);
 const [err, setErr] = useState("");
 
-const [editing, setEditing] = useState(null); // null = tạo mới; object = đang sửa
+const [editing, setEditing] = useState(null); 
 const nameRef = useRef(null);
 const fileRef = useRef(null);
 
-const [preview, setPreview] = useState("");   // preview ảnh đang chọn (hoặc ảnh hiện tại khi edit)
+const [preview, setPreview] = useState("");  
 const [submitting, setSubmitting] = useState(false);
 
-// --- Pagination ---
+
 const [page, setPage] = useState(1);
 const [perPage, setPerPage] = useState(12);
 const totalPages = Math.max(1, Math.ceil(items.length / perPage));
@@ -37,18 +34,18 @@ const startIdx = (page - 1) * perPage;
 const endIdx = startIdx + perPage;
 const pagedItems = items.slice(startIdx, endIdx);
 
-// Khi list thay đổi hoặc perPage đổi, đảm bảo page hợp lệ
+
 useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     if (page < 1) setPage(1);
 }, [items.length, perPage, totalPages]); // eslint-disable-line
 
-// ------- LOAD LIST -------
+
 const load = async () => {
     setLoading(true);
     setErr("");
     try {
-    const { data } = await api.get("/backstage"); // GET /api/backstage
+    const { data } = await api.get("/backstage");
     setItems(Array.isArray(data) ? data : []);
     } catch (e) {
     console.error("Load backstage error:", e);
@@ -90,7 +87,7 @@ const onEdit = (row) => {
 const onDelete = async (row) => {
     if (!window.confirm(`Xoá ảnh hậu kỳ "${row.name}"?`)) return;
     try {
-    await api.delete(`/backstage/${row.id}`); // DELETE /api/backstage/:id
+    await api.delete(`/backstage/${row.id}`); 
     toast.success("Đã xoá!");
     setTimeout(() => window.location.reload(), 1000);
     } catch (e) {
@@ -114,7 +111,7 @@ const onSubmit = async (e) => {
 
     const file = fileRef.current?.files?.[0];
     if (file) {
-    // field phải là 'img' theo API backend
+
     form.append("img", file);
     }
 
@@ -122,20 +119,20 @@ const onSubmit = async (e) => {
     setSubmitting(true);
 
     if (editing) {
-        // PUT /api/backstage/:id (multipart/form-data)
+
         await api.put(`/backstage/${editing.id}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Cập nhật thành công!");
     } else {
-        // POST /api/backstage (multipart/form-data)
+    
         await api.post("/backstage", form, {
         headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Thêm mới thành công!");
     }
 
-    // reload toàn trang theo yêu cầu của bạn
+
     setTimeout(() => window.location.reload(), 1200);
     } catch (e) {
     console.error("Submit backstage error:", e);

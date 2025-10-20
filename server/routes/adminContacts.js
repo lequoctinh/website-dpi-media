@@ -1,19 +1,11 @@
 const express = require("express");
 const pool = require("../db"); 
-const mysql = require("mysql2/promise");
+
 const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
 
-const pool = mysql.createPool({
-host: process.env.DB_HOST || "localhost",
-user: process.env.DB_USER || "root",
-password: process.env.DB_PASSWORD || "",
-database: process.env.DB_NAME || "mediatp",
-waitForConnections: true,
-connectionLimit: 10,
-});
 
 const UPLOAD_DIR = path.resolve(__dirname, "../uploads");
 const escapeLike = (s = "") => s.replace(/[%_]/g, "\\$&");
@@ -75,7 +67,7 @@ try {
 }
 });
 
-// Tải file (ưu tiên file mới nhất trong contact_files; nếu không có thì dùng contacts.file_path)
+
 router.get("/:id/file", async (req, res) => {
 try {
     const { id } = req.params;

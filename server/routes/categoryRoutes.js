@@ -1,15 +1,9 @@
 const express = require("express");
 const pool = require("../db"); 
 const router = express.Router();
-const mysql = require("mysql2");
 
-// Kết nối database
-const db = mysql.createConnection({
-host: process.env.DB_HOST,
-user: process.env.DB_USER,
-password: process.env.DB_PASSWORD,
-database: process.env.DB_NAME,
-});
+
+
 
 router.get("/", (req, res) => {
 db.query("SELECT * FROM category ORDER BY id ASC", (err, results) => {

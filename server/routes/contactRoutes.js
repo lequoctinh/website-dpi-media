@@ -4,16 +4,9 @@ const nodemailer = require("nodemailer");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const mysql = require("mysql2/promise");
+
 
 const router = express.Router();
-
-const db = mysql.createPool({
-host: process.env.DB_HOST || "localhost",
-user: process.env.DB_USER || "root",
-password: process.env.DB_PASSWORD || "",
-database: process.env.DB_NAME || "mediatp",
-});
 
 const UPLOAD_DIR = path.resolve(__dirname, "../uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });

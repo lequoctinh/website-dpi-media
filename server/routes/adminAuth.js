@@ -1,44 +1,27 @@
-// server/routes/adminAuth.js
+
 const express = require("express");
-const pool = require("../db"); 
-const mysql = require("mysql2/promise");
+const pool = require("../db");
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
-// Tạo pool kết nối ngay trong file này
-const pool = mysql.createPool({
-host: process.env.DB_HOST,
-user: process.env.DB_USER,
-password: process.env.DB_PASSWORD || "",
-database: process.env.DB_NAME,
-waitForConnections: true,
-connectionLimit: 10,
-queueLimit: 0,
-timezone: "Z",
-charset: "utf8mb4_general_ci",
-});
-
-// Helper tạo JWT
 function signToken(payload, expiresIn) {
 return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
 }
 
-// Helper set cookie httpOnly
+const isProd = process.env.NODE_ENV === "production";
+
 function setAuthCookie(res, token, remember) {
 res.cookie("admin_token", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false, // đổi thành true khi deploy HTTPS
-    maxAge: remember
-    ? 7 * 24 * 60 * 60 * 1000 // 7 ngày
-    : 24 * 60 * 60 * 1000, // 1 ngày
+    sameSite: isProd ? "none" : "lax", 
+    secure: isProd,                  
+    maxAge: remember ? 7*24*60*60*1000 : 24*60*60*1000,
     path: "/",
 });
 }
-
-// POST /api/admin/auth/login
 router.post("/login", async (req, res) => {
 try {
     const { username, password, remember } = req.body;
@@ -72,7 +55,7 @@ try {
 }
 });
 
-// GET /api/admin/auth/me
+
 router.get("/me", async (req, res) => {
 try {
     const token = req.cookies?.admin_token;
@@ -85,7 +68,7 @@ try {
 }
 });
 
-// POST /api/admin/auth/logout
+
 router.post("/logout", (req, res) => {
 res.clearCookie("admin_token", { path: "/" });
 return res.json({ message: "Đã đăng xuất" });

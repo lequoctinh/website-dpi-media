@@ -1,22 +1,10 @@
 const express = require("express");
 const pool = require("../db"); 
-const mysql = require('mysql2/promise');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
 const router = express.Router();
 
-// Kết nối DB
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {

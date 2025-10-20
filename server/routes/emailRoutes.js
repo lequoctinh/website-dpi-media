@@ -4,18 +4,11 @@ const nodemailer = require("nodemailer");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const mysql = require("mysql2/promise");
 
 const router = express.Router();
 
-const db = mysql.createPool({
-host: process.env.DB_HOST || "localhost",
-user: process.env.DB_USER || "root",
-password: process.env.DB_PASSWORD || "",
-database: process.env.DB_NAME || "mediatp",
-});
 
-// uploads/contacts
+
 const UPLOAD_ROOT = path.resolve(__dirname, "../uploads");
 const CONTACTS_DIR = path.join(UPLOAD_ROOT, "contacts");
 if (!fs.existsSync(CONTACTS_DIR)) fs.mkdirSync(CONTACTS_DIR, { recursive: true });
@@ -66,7 +59,7 @@ const [rs] = await db.query(
 return rs.insertId;
 }
 
-// POST /api/email/quote
+
 router.post("/quote", upload.fields([{ name: "file", maxCount: 1 }]), async (req, res) => {
 try {
     const {
@@ -144,7 +137,7 @@ try {
     .filter(Boolean)
     .join(" | ");
 
-    // Lưu đường dẫn tương đối: contacts/<filename>
+
     const dbRelPath = fileMeta ? path.posix.join("contacts", fileMeta.filename) : null;
 
     const contactId = await saveContact({
@@ -170,7 +163,7 @@ try {
 }
 });
 
-// POST /api/email/send
+
 router.post("/send", async (req, res) => {
 try {
     const { email } = req.body || {};
