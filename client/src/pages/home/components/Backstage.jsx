@@ -38,7 +38,7 @@ return (
         <header className="mx-auto mb-8 max-w-3xl text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-            Behind the Scenes
+            Hậu Trường
         </p>
         <h2 id="hau-truong-heading" className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
             Hậu trường <span className="text-white/70">sản xuất</span>

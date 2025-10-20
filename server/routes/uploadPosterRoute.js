@@ -21,7 +21,6 @@ if (!req.file) {
     return res.status(400).json({ error: "Không có file được gửi lên." });
 }
 
-// Trả về đường dẫn file để lưu vào DB
 res.status(200).json({ posterPath: `/uploads/posters/${req.file.filename}` });
 });
 

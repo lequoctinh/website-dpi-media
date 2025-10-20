@@ -7,6 +7,8 @@ import Backstage from "./components/Backstage";
 import About from "./components/About";
 import Faq from "./components/Faq";
 import Contact from "./components/Contact";
+import News from "./components/News";
+import './css/Home.css';
 export default function Home() {
 return (
     <>
@@ -24,6 +26,9 @@ return (
     </section>
     <section id="gioi-thieu">
         <About/>
+    </section>
+    <section id="hoat-dong">
+        <News/>
     </section>
     <section id="faq">
         <Faq/>

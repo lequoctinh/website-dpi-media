@@ -19,22 +19,17 @@ const [items, setItems] = useState([]);
 const [loading, setLoading] = useState(true);
 const [err, setErr] = useState("");
 
-const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(total / pageSize)),
-    [total, pageSize]
-);
+const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
+const BASE = (api.defaults?.baseURL || "").replace(/\/+$/, "");
 
 const load = async () => {
     setLoading(true);
     setErr("");
     try {
-    const { data } = await api.get("/admin/contacts", {
-        params: { q, source, page, pageSize },
-    });
+    const { data } = await api.get("/admin/contacts", { params: { q, source, page, pageSize } });
     setItems(data.items || []);
     setTotal(data.total || 0);
     } catch (e) {
-    console.error("Load contacts error:", e);
     setErr(e?.response?.data?.error || "Không tải được liên hệ");
     } finally {
     setLoading(false);
@@ -43,7 +38,6 @@ const load = async () => {
 
 useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [q, source, page, pageSize]);
 
 const onDelete = async (id) => {
@@ -51,10 +45,8 @@ const onDelete = async (id) => {
     try {
     await api.delete(`/admin/contacts/${id}`);
     toast.success("Đã xoá!");
-    // Tải lại page hiện tại:
     load();
     } catch (e) {
-    console.error("Delete contact error:", e);
     toast.error(e?.response?.data?.error || "Xoá thất bại");
     }
 };
@@ -65,6 +57,19 @@ const resetFilter = () => {
     setPage(1);
 };
 
+const fileDownloadHref = (row) => {
+    if (!row?.id) return "";
+    return `${BASE}/admin/contacts/${row.id}/file`;
+};
+
+const fileNameFromPath = (p) => {
+    try {
+    return String(p || "").split(/[\\/]/).pop() || "";
+    } catch {
+    return "";
+    }
+};
+
 return (
     <div className="space-y-6">
     <Toaster position="top-right" />
@@ -72,9 +77,7 @@ return (
     <div className="flex items-center justify-between">
         <div>
         <h1 className="text-2xl font-semibold text-white">Liên hệ</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-            Dữ liệu từ form Subscribe/Báo giá/Contact.
-        </p>
+        <p className="mt-1 text-sm text-zinc-400">Dữ liệu từ form Subscribe/Báo giá/Contact.</p>
         </div>
         <div className="flex items-center gap-2">
         <button
@@ -86,7 +89,6 @@ return (
         </div>
     </div>
 
-    {/* Filters */}
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex-1">
@@ -96,7 +98,10 @@ return (
             </svg>
             <input
                 value={q}
-                onChange={(e) => { setPage(1); setQ(e.target.value); }}
+                onChange={(e) => {
+                setPage(1);
+                setQ(e.target.value);
+                }}
                 placeholder="Tìm theo tên, email, nội dung…"
                 className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
             />
@@ -105,13 +110,19 @@ return (
 
         <SelectDark
             value={source}
-            onChange={(e) => { setPage(1); setSource(e.target.value); }}
+            onChange={(e) => {
+            setPage(1);
+            setSource(e.target.value);
+            }}
             options={SOURCE_OPTIONS}
         />
 
         <SelectDark
             value={pageSize}
-            onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
+            onChange={(e) => {
+            setPage(1);
+            setPageSize(Number(e.target.value));
+            }}
             options={[
             { value: 12, label: "12/trang" },
             { value: 24, label: "24/trang" },
@@ -128,7 +139,6 @@ return (
         </div>
     </div>
 
-    {/* List */}
     <div className="rounded-2xl border border-white/10 bg-white/5">
         {loading ? (
         <div className="p-4 text-sm text-zinc-400">Đang tải…</div>
@@ -147,6 +157,7 @@ return (
                 <th className="px-4 py-3 text-left">IP</th>
                 <th className="px-4 py-3 text-left">Thời gian</th>
                 <th className="px-4 py-3 text-left">Nội dung</th>
+                <th className="px-4 py-3 text-left">Tệp</th>
                 <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
             </thead>
@@ -162,19 +173,41 @@ return (
                     </span>
                 </td>
                 <td className="px-4 py-2">{c.ip || "-"}</td>
-                <td className="px-4 py-2">
-                    {new Date(c.created_at).toLocaleString()}
-                </td>
+                <td className="px-4 py-2">{new Date(c.created_at).toLocaleString()}</td>
                 <td className="px-4 py-2 max-w-[320px]">
                     <p className="line-clamp-2 text-zinc-300">{c.message || "-"}</p>
+                </td>
+                <td className="px-4 py-2">
+                    {c.has_file || c.file_path ? (
+                    <div className="flex items-center gap-2">
+                        {c.file_path ? (
+                        <span className="truncate max-w-[180px] text-zinc-300">{fileNameFromPath(c.file_path)}</span>
+                        ) : (
+                        <span className="text-emerald-300">Có</span>
+                        )}
+                        <a
+                        href={fileDownloadHref(c)}
+                        target="_blank"
+                        rel="noopener"
+                        className="rounded-md border border-emerald-500 px-2 py-1 text-xs text-emerald-300 hover:bg-emerald-500/15"
+                        >
+                        Tải
+                        </a>
+                    </div>
+                    ) : (
+                    <span className="text-zinc-500">Không</span>
+                    )}
                 </td>
                 <td className="px-4 py-2 text-right space-x-2">
                     <button
                     onClick={async () => {
                         try {
                         const { data } = await api.get(`/admin/contacts/${c.id}`);
+                        const fileInfo = data.file_path ? `\nFile: ${fileNameFromPath(data.file_path)}` : "";
                         alert(
-                            `#${data.id} — ${data.email}\nNguồn: ${data.source}\nIP: ${data.ip || "-"}\nThời gian: ${new Date(data.created_at).toLocaleString()}\n----------------\n${data.message || "-"}`
+                            `#${data.id} — ${data.email}\nNguồn: ${data.source}\nIP: ${data.ip || "-"}\nThời gian: ${new Date(
+                            data.created_at
+                            ).toLocaleString()}\n----------------\n${data.message || "-"}${fileInfo}`
                         );
                         } catch (e) {
                         toast.error("Không lấy được chi tiết");
@@ -198,7 +231,6 @@ return (
         )}
     </div>
 
-    {/* Pagination */}
     <div className="flex items-center justify-between text-sm">
         <span className="text-zinc-400">
         Tổng: <b className="text-white">{total}</b> liên hệ
@@ -211,9 +243,7 @@ return (
         >
             Trước
         </button>
-        <span className="min-w-[90px] text-center text-zinc-300">
-            Trang {page}/{totalPages}
-        </span>
+        <span className="min-w-[90px] text-center text-zinc-300">Trang {page}/{totalPages}</span>
         <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
@@ -227,7 +257,6 @@ return (
 );
 }
 
-/** Select “dark” đồng bộ giao diện admin */
 function SelectDark({ value, onChange, options }) {
 return (
     <div className="relative">
@@ -242,9 +271,7 @@ return (
         </option>
         ))}
     </select>
-    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400">
-        ▾
-    </span>
+    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400">▾</span>
     </div>
 );
 }

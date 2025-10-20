@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { api } from "../../../api/api";
 
-// ======= Config from env =======
-const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
+
 const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE || "").replace(/\/+$/, "");
 
-// ======= Helpers =======
 const extractVideoId = (url) => {
 if (!url) return null;
 const m =
@@ -32,8 +31,6 @@ return (
     />
 );
 };
-
-// ======= Component =======
 export default function Project() {
 const [categories, setCategories] = useState([]);
 const [selectedCat, setSelectedCat] = useState(null);
@@ -44,7 +41,6 @@ const [err, setErr] = useState("");
 
 const [selectedVideo, setSelectedVideo] = useState(null);
 
-// pagination
 const perPage = 6;
 const [page, setPage] = useState(1);
 const totalPages = Math.max(1, Math.ceil(videos.length / perPage));
@@ -53,37 +49,54 @@ const paged = useMemo(() => {
     return videos.slice(start, start + perPage);
 }, [videos, page]);
 
-// fetch categories
 useEffect(() => {
     let mounted = true;
-    fetch(`${API_BASE}/category`)
-    .then((r) => (r.ok ? r.json() : Promise.reject(r)))
-    .then((data) => mounted && setCategories(data || []))
-    .catch(() => mounted && setCategories([]));
-    return () => (mounted = false);
+    const controller = new AbortController();
+
+    api
+    .get("/category", { signal: controller.signal })
+    .then((res) => mounted && setCategories(res.data || []))
+    .catch((e) => {
+        if (e.name === "CanceledError" || e.code === "ERR_CANCELED") return;
+        if (mounted) setCategories([]); 
+    });
+
+    return () => {
+    mounted = false;
+    controller.abort();
+    };
 }, []);
 
-// fetch videos by category
 useEffect(() => {
     let mounted = true;
+    const controller = new AbortController();
+
     setLoading(true);
     setErr("");
 
-    const url = selectedCat
-    ? `${API_BASE}/video-projeck?category_id=${selectedCat}`
-    : `${API_BASE}/video-projeck`;
-
-    fetch(url)
-    .then((r) => (r.ok ? r.json() : Promise.reject(r)))
-    .then((data) => {
+    api
+    .get("/video-projeck", {
+        signal: controller.signal,
+        params: selectedCat ? { category_id: selectedCat } : undefined,
+    })
+    .then((res) => {
         if (!mounted) return;
-        setVideos(Array.isArray(data) ? data : []);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setVideos(data);
         setPage(1);
     })
-    .catch(() => mounted && setErr("Không tải được danh sách dự án."))
-    .finally(() => mounted && setLoading(false));
+    .catch((e) => {
+        if (e.name === "CanceledError" || e.code === "ERR_CANCELED") return;
+        if (mounted) setErr("Không tải được danh sách dự án.");
+    })
+    .finally(() => {
+        if (mounted) setLoading(false);
+    });
 
-    return () => (mounted = false);
+    return () => {
+    mounted = false;
+    controller.abort();
+    };
 }, [selectedCat]);
 
 const openVideo = (v) => setSelectedVideo(v);
@@ -92,19 +105,17 @@ const closeVideo = () => setSelectedVideo(null);
 return (
     <section id="projects" aria-labelledby="projects-heading" className="relative bg-black">
     <div className="mx-auto max-w-7xl px-4 py-16 md:py-20">
-        {/* Header */}
         <header className="mx-auto mb-8 max-w-3xl text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-            Portfolio
+            Dự Án
         </p>
         <h2 id="projects-heading" className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
             Dự án của <span className="text-white/70">DPI Media</span>
         </h2>
-        <p className="mt-3 text-white/70">Chọn danh mục để xem các showreel, TVC, social video… đã thực hiện.</p>
+        <p className="mt-3 text-white/70">Chọn danh mục để xem các Commercial, TVC, social video… đã thực hiện.</p>
         </header>
 
-        {/* Category filter */}
         <nav aria-label="Lọc danh mục dự án" className="mb-8 flex flex-wrap items-center justify-center gap-2">
         <FilterButton active={!selectedCat} onClick={() => setSelectedCat(null)} label="Tất cả" />
         {categories.map((c) => (
@@ -112,7 +123,6 @@ return (
         ))}
         </nav>
 
-        {/* Grid / States */}
         <div className="relative">
         {loading && (
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -164,7 +174,6 @@ return (
         )}
         </div>
 
-        {/* Pagination */}
         {!loading && !err && videos.length > perPage && (
         <nav aria-label="Phân trang dự án" className="mt-8 flex items-center justify-center gap-2">
             <PageBtn disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>«</PageBtn>
@@ -175,7 +184,6 @@ return (
         </nav>
         )}
 
-        {/* Modal */}
         {selectedVideo && (
         <div
             role="dialog"
@@ -213,7 +221,6 @@ return (
 );
 }
 
-// ======= UI bits =======
 function FilterButton({ active, onClick, label }) {
 return (
     <button

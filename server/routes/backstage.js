@@ -17,7 +17,6 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Cấu hình upload ảnh vào public/backstage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '../public/backstage'));
@@ -30,7 +29,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-// 📌 GET tất cả ảnh hậu kỳ
 router.get('/', async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM backstage');
@@ -42,7 +40,6 @@ router.get('/', async (req, res) => {
 });
 
 
-// 📌 POST - Thêm ảnh hậu kỳ
 router.post('/', upload.single('img'), async (req, res) => {
     try {
         const { name } = req.body;
@@ -57,7 +54,6 @@ router.post('/', upload.single('img'), async (req, res) => {
 });
 
 
-// 📌 PUT - Cập nhật hậu kỳ (tên + hình mới nếu có)
 router.put('/:id', upload.single('img'), async (req, res) => {
     const { name } = req.body;
     const { id } = req.params;
@@ -68,7 +64,6 @@ router.put('/:id', upload.single('img'), async (req, res) => {
         if (req.file) {
             const newPath = '/images/backstage/' + req.file.filename;
 
-            // Xoá file cũ (nếu có)
             const [rows] = await pool.query('SELECT img FROM backstage WHERE id = ?', [id]);
             if (rows[0]?.img) {
                 const oldImgPath = path.join(__dirname, '../public', rows[0].img);
@@ -93,12 +88,10 @@ router.put('/:id', upload.single('img'), async (req, res) => {
 });
 
 
-// 📌 DELETE - Xoá hậu kỳ
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Lấy đường dẫn ảnh để xoá file
         const [rows] = await pool.query('SELECT img FROM backstage WHERE id = ?', [id]);
         if (rows[0]?.img) {
             const imgPath = path.join(__dirname, '../public', rows[0].img);

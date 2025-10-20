@@ -1,9 +1,8 @@
-/* ========= Tokens ========= */
 :root{
 --hdr-text:      #f5f5f5;      
---hdr-text-dim:  #cccccc;       /* chữ phụ */
---hdr-accent:    #ffffff;       /* màu underline khi hover */
---hdr-hover:     #ffffff;       /* chữ hover */
+--hdr-text-dim:  #cccccc;       
+--hdr-accent:    #ffffff;       
+--hdr-hover:     #ffffff;       
 --hdr-border:    rgba(255,255,255,.15);
 }
 
@@ -32,7 +31,6 @@ to {
 }
 }
 
-/* Reset ul/li/a */
 .Header-Nav ul{
 list-style: none;
 margin: 0;
@@ -52,7 +50,6 @@ line-height: 1.2;
 transition: color .2s ease;
 }
 
-/* Hover: đổi màu + underline */
 .Header-Nav a:hover{
 color: var(--hdr-hover);
 }
@@ -82,7 +79,6 @@ height: 48px;
 width: auto;
 }
 
-/* Focus */
 .Header-Nav a:focus-visible{
 outline: 2px solid var(--hdr-accent);
 outline-offset: 2px;
@@ -115,8 +111,104 @@ border-radius: 4px;
     }
 }
 
-/* Khi scroll có thể đổi nền */
 body.scrolled .Container-Header{
 background: rgba(0,0,0,0.9);
 backdrop-filter: blur(6px);
 }
+:root{
+--hdr-bg: rgba(10,10,12,0.78);      
+--hdr-bg-solid: rgba(10,10,12,0.88);
+--hdr-ring: rgba(255,255,255,0.10);
+--hdr-div: rgba(255,255,255,0.14);
+--link: rgba(255,255,255,0.92);
+--link-dim: rgba(255,255,255,0.72);
+}
+
+.Header-Bar{
+background: linear-gradient(to bottom, var(--hdr-bg), rgba(0,0,0,0));
+-webkit-backdrop-filter: blur(8px);
+backdrop-filter: blur(8px);
+border-bottom: 1px solid var(--hdr-ring);
+}
+
+body.scrolled .Header-Bar,
+.Container-Header[data-open="true"] .Header-Bar{
+background: var(--hdr-bg-solid);
+}
+
+.Header-Panel{
+background: var(--hdr-bg-solid);
+border: 1px solid var(--hdr-ring);
+border-radius: 16px;
+margin: 8px 12px 12px;
+box-shadow: 0 16px 48px -12px rgba(0,0,0,0.8);
+}
+
+.MenuDivider{
+height: 1px;
+margin: 10px 12px 0;
+background: linear-gradient(90deg, transparent, var(--hdr-div), transparent);
+}
+
+.Header-Panel a{
+color: var(--link);
+text-decoration: none;
+display: inline-flex;
+align-items: center;
+}
+
+.Header-Panel a{
+padding: 10px 12px;
+border-radius: 12px;
+}
+
+.Header-Panel a:hover{
+background: rgba(255,255,255,0.06);
+}
+
+.Header-Bar a:hover{
+color: #fff;
+}
+
+.Header-Bar button svg{
+color: var(--link);
+}
+
+@media (min-width: 1024px){
+.Header-Bar{ 
+    margin-left: auto; margin-right: auto;
+    max-width: 1200px;
+}
+}
+/* Nút CTA header: giống hình 1, pill gradient, không ăn hover/underline của menu */
+.btn-quote{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  padding: 0.75rem 1.25rem;       /* px-6 py-3 */
+  border-radius: 9999px;          /* pill */
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1 !important;      /* tránh text “đẩy” mép dưới */
+  color:#fff;
+  background: linear-gradient(90deg,#FF3B6A 0%, #FF8C1A 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 10px 24px -12px rgba(0,0,0,.65), /* đổ bóng ngoài */
+    inset 0 -2px 0 rgba(255,255,255,.18); /* highlight mép dưới */
+  text-decoration: none !important;
+  overflow: hidden;               /* giữ viền pill sạch */
+}
+
+/* Không kế thừa hiệu ứng link trong header */
+.Header-Nav .btn-quote:hover,
+.Header-Nav .btn-quote:focus{
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+  box-shadow:
+    0 12px 28px -12px rgba(0,0,0,.7),
+    inset 0 -2px 0 rgba(255,255,255,.2);
+}
+
+.Header-Nav .btn-quote::after{ display:none !important; } 

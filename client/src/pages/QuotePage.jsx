@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://localhost:3001";
+const MAX_UPLOAD_MB = 25;
 
 const PROJECT_TYPES = [
 "Video 3D Animation",
@@ -62,16 +63,21 @@ const onChange = (e) => {
         setField("file", null);
         return;
     }
-    const okType = /(image\/(png|jpe?g|webp)|application\/pdf|application\/zip|application\/x-zip-compressed)$/i.test(
+
+    const ext = (f.name.split(".").pop() || "").toLowerCase();
+    const allowedExt = ["png","jpg","jpeg","webp","pdf","zip","rar","7z","doc","docx","xls","xlsx","ppt","pptx","mp4","mov"];
+    const mimeOk = /(image\/(png|jpe?g|webp)|application\/pdf|application\/zip|application\/x-zip-compressed|application\/x-rar-compressed|application\/x-7z-compressed|application\/msword|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document|application\/vnd\.ms-excel|application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet|application\/vnd\.ms-powerpoint|application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation|video\/(mp4|quicktime))/i.test(
         f.type || ""
     );
+    const okType = mimeOk || allowedExt.includes(ext);
+
     if (!okType) {
-        setErrors((s) => ({ ...s, file: "Chỉ chấp nhận PNG/JPG/WebP hoặc PDF/ZIP." }));
+        setErrors((s) => ({ ...s, file: "Hỗ trợ: PNG/JPG/WebP, PDF/ZIP/RAR/7Z, DOC/DOCX, XLS/XLSX, PPT/PPTX, MP4/MOV." }));
         setField("file", null);
         return;
     }
-    if (f.size > 15 * 1024 * 1024) {
-        setErrors((s) => ({ ...s, file: "Dung lượng tối đa 15MB." }));
+    if (f.size > MAX_UPLOAD_MB * 1024 * 1024) {
+        setErrors((s) => ({ ...s, file: `Dung lượng tối đa ${MAX_UPLOAD_MB}MB.` }));
         setField("file", null);
         return;
     }
@@ -121,7 +127,6 @@ const isValid = useMemo(() => {
     form.contactMethod &&
     form.agree &&
     !submitting;
-
     return ok;
 }, [form, submitting]);
 
@@ -170,8 +175,7 @@ const onSubmit = async (e) => {
         agree: false,
     });
     setTimeout(() => navigate("/"), 1800);
-    } catch (err) {
-    console.error(err);
+    } catch (_err) {
     setStatus({ type: "error", msg: "❌ Gửi thất bại. Vui lòng thử lại." });
     } finally {
     setSubmitting(false);
@@ -187,12 +191,8 @@ return (
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
             Báo giá nhanh — DPI Media
         </p>
-        <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
-            Cho chúng tôi biết nhu cầu của bạn
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-white/70">
-            Điền form (≈1–2 phút). Chúng tôi phản hồi với đề xuất & khung chi phí phù hợp.
-        </p>
+        <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">Cho chúng tôi biết nhu cầu của bạn</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-white/70">Điền form (≈1–2 phút). Chúng tôi phản hồi với đề xuất & khung chi phí phù hợp.</p>
         </header>
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] md:p-7">
@@ -218,7 +218,7 @@ return (
                 value={form.phone}
                 onChange={onChange}
                 inputMode="tel"
-                placeholder="0989 000 000"
+                placeholder="nhập số điện của bạn"
                 className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-white placeholder-white/40 outline-none focus:border-white/30"
                 required
                 />
@@ -232,7 +232,7 @@ return (
                 type="email"
                 value={form.email}
                 onChange={onChange}
-                placeholder="you@company.com"
+                placeholder="you@gmail.com"
                 className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-white placeholder-white/40 outline-none focus:border-white/30"
                 required
                 />
@@ -242,13 +242,7 @@ return (
             <Field label="Phương thức liên hệ ưa thích" required htmlFor="contactMethod">
                 <div className="flex flex-wrap gap-2">
                 {CONTACTS.map((m) => (
-                    <ChipRadio
-                    key={m}
-                    name="contactMethod"
-                    value={m}
-                    active={form.contactMethod === m}
-                    onChange={onChange}
-                    >
+                    <ChipRadio key={m} name="contactMethod" value={m} active={form.contactMethod === m} onChange={onChange}>
                     {m}
                     </ChipRadio>
                 ))}
@@ -334,7 +328,6 @@ return (
             </div>
             </div>
 
-            {/* Group 3: Chi tiết bổ sung */}
             <GroupTitle>Chi tiết bổ sung</GroupTitle>
             <div className="grid gap-6">
             <Field label="File/tài liệu liên quan (nếu có)" htmlFor="file" desc="Storyboard, brief, hình tham khảo…">
@@ -342,13 +335,20 @@ return (
                 id="file"
                 name="file"
                 type="file"
+                accept="
+                    image/png,image/jpeg,image/webp,
+                    application/pdf,application/zip,application/x-zip-compressed,application/x-rar-compressed,application/x-7z-compressed,
+                    application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                    application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                    application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                    video/mp4,video/quicktime
+                "
                 onChange={onChange}
                 className="block w-full cursor-pointer rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white hover:file:bg-white/20"
                 />
                 {form.file && (
                 <p className="mt-2 text-xs text-white/60">
-                    Đã chọn: <span className="text-white/90">{form.file.name}</span>{" "}
-                    ({Math.round(form.file.size / 1024)} KB)
+                    Đã chọn: <span className="text-white/90">{form.file.name}</span> ({Math.round(form.file.size / 1024)} KB)
                 </p>
                 )}
                 {errors.file && <HintError>{errors.file}</HintError>}
@@ -367,16 +367,8 @@ return (
                 />
             </Field>
 
-            {/* consent + honeypot */}
             <label className="flex items-start gap-3 text-sm text-white/80">
-                <input
-                type="checkbox"
-                name="agree"
-                checked={form.agree}
-                onChange={onChange}
-                className="mt-1 h-4 w-4 accent-white"
-                required
-                />
+                <input type="checkbox" name="agree" checked={form.agree} onChange={onChange} className="mt-1 h-4 w-4 accent-white" required />
                 <span>
                 Tôi đồng ý để DPI Media liên hệ và xử lý thông tin nhằm tư vấn báo giá.
                 <span className="text-white/50"> (Có thể yêu cầu xóa dữ liệu bất kỳ lúc nào.)</span>
@@ -387,7 +379,6 @@ return (
                 <input name="company" value={form.company} onChange={onChange} autoComplete="off" />
             </label>
 
-            {/* Submit */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-white/50">
                 Thời gian phản hồi dự kiến: <span className="text-white/70">trong ngày làm việc</span>.
@@ -396,9 +387,7 @@ return (
                 type="submit"
                 disabled={!isValid}
                 className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition ${
-                    isValid
-                    ? "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:opacity-95"
-                    : "cursor-not-allowed bg-white/10 text-white/40"
+                    isValid ? "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:opacity-95" : "cursor-not-allowed bg-white/10 text-white/40"
                 }`}
                 >
                 {submitting && (
@@ -414,9 +403,7 @@ return (
             {status.msg && (
                 <div
                 className={`rounded-xl border px-4 py-3 text-sm ${
-                    status.type === "ok"
-                    ? "border-white/10 bg-emerald-500/10 text-emerald-300"
-                    : "border-white/10 bg-rose-500/10 text-rose-300"
+                    status.type === "ok" ? "border-white/10 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-rose-500/10 text-rose-300"
                 }`}
                 >
                 {status.msg}
@@ -428,8 +415,8 @@ return (
 
         <p className="mt-6 text-center text-xs text-white/50">
         Cần hỗ trợ nhanh? Gọi{" "}
-        <a href="tel:0989000000" className="text-white/80 underline underline-offset-4">
-            0989 000 000
+        <a href="tel:0982561914" className="text-white/80 underline underline-offset-4">
+            098 2561 914
         </a>{" "}
         hoặc nhắn Zalo.
         </p>
@@ -438,7 +425,6 @@ return (
 );
 }
 
-/* ========== UI bits ========== */
 function GroupTitle({ children }) {
 return <h2 className="text-sm font-semibold uppercase tracking-wider text-white/60">{children}</h2>;
 }
@@ -463,9 +449,7 @@ function CardRadio({ name, value, checked, onChange, children }) {
 return (
     <label
     className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 ${
-        checked
-        ? "border-transparent bg-white text-gray-900"
-        : "border-white/10 bg-white/[0.04] text-white/90 hover:bg-white/[0.06]"
+        checked ? "border-transparent bg-white text-gray-900" : "border-white/10 bg-white/[0.04] text-white/90 hover:bg-white/[0.06]"
     }`}
     >
     <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="hidden" required />
@@ -478,9 +462,7 @@ function ChipCheckbox({ name, value, checked, onChange, children }) {
 return (
     <label
     className={`cursor-pointer rounded-full border px-4 py-2 text-sm ${
-        checked
-        ? "border-transparent bg-gradient-to-r from-rose-500 to-orange-500 text-white"
-        : "border-white/15 bg-white/[0.04] text-white/80 hover:bg-white/[0.1]"
+        checked ? "border-transparent bg-gradient-to-r from-rose-500 to-orange-500 text-white" : "border-white/15 bg-white/[0.04] text-white/80 hover:bg-white/[0.1]"
     }`}
     >
     <input type="checkbox" name={name} value={value} checked={checked} onChange={onChange} className="hidden" />
@@ -493,9 +475,7 @@ function ChipRadio({ name, value, active, onChange, children }) {
 return (
     <label
     className={`cursor-pointer rounded-full border px-4 py-2 text-sm ${
-        active
-        ? "border-transparent bg-white text-gray-900"
-        : "border-white/15 bg-white/[0.04] text-white/80 hover:bg-white/[0.1]"
+        active ? "border-transparent bg-white text-gray-900" : "border-white/15 bg-white/[0.04] text-white/80 hover:bg-white/[0.1]"
     }`}
     >
     <input type="radio" name={name} value={value} checked={active} onChange={onChange} className="hidden" required />

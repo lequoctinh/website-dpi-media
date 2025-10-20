@@ -107,12 +107,11 @@ return (
                 style={{ transform: reduceMotion ? undefined : "translateZ(50px)" }}
                 >
                 <h2 className="text-3xl font-extrabold leading-tight text-white md:text-4xl">
-                    Showreel 2024 — <span className="text-white/70">60s</span>
+                    Showreel 2025 — <span className="text-white/70">60s</span>
                 </h2>
                 <p className="mt-3 text-white/80">
                     DPI Media chuyên dựng video ngắn gọn, “đã mắt” và đúng cảm xúc thương hiệu.
-                    Trải nghiệm xem được tối ưu: tải nhẹ, phát khi bạn muốn, hỗ trợ bàn phím
-                    và tôn trọng tuỳ chọn giảm chuyển động.
+                    Trải nghiệm xem được tối ưu: tải nhẹ, phát khi bạn muốn.
                 </p>
 
                 <div className="mt-5 flex flex-wrap items-center gap-3">

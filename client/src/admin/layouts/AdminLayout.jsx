@@ -8,7 +8,8 @@ const NAV = [
 { to: "/admin/backstage", label: "Hậu trường", icon: "🎬" },
 { to: "/admin/projects",  label: "Dự án",      icon: "🧱" },
 { to: "/admin/categories",label: "Danh mục",   icon: "🏷️" },
-{ to: "/admin/contacts",  label: "Liên hệ",    icon: "📬" }, // 🔥 mới
+{ to: "/admin/posts",      label: "Bài viết",   icon: "📰" },
+{ to: "/admin/contacts",  label: "Liên hệ",    icon: "📬" },
 ];
 
 export default function AdminLayout() {
@@ -28,7 +29,6 @@ const logout = async () => {
 
 return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100">
-    {/* background blobs */}
     <div
         aria-hidden
         className="pointer-events-none fixed inset-0 opacity-[0.4] mix-blend-screen"
@@ -46,7 +46,6 @@ return (
         }}
     />
 
-    {/* HEADER — fixed, luôn nổi trên tất cả */}
     <header className="fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-zinc-900/70 backdrop-blur">
         <div className="mx-auto flex h-14 md:h-16 max-w-screen-2xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
@@ -116,7 +115,6 @@ return (
 function Sidebar({ open, onClose }) {
 return (
     <>
-    {/* mobile overlay: đẩy xuống dưới header */}
     <div
         className={[
         "fixed left-0 right-0 top-14 bottom-0 z-30 bg-black/50 md:hidden transition-opacity",
@@ -125,7 +123,6 @@ return (
         onClick={onClose}
     />
 
-    {/* sidebar: cũng bắt đầu dưới header khi ở mobile */}
     <aside
         className={[
         "fixed left-0 top-14 bottom-0 z-40 w-72 border-r border-white/10 bg-zinc-900/70 backdrop-blur",

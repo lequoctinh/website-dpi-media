@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { HashLink } from "react-router-hash-link";
 import "./css/Header.css";
-
+import { Link } from "react-router-dom";
 function CleanHashLink({ to, children, offset = 80, ...rest }) {
 return (
     <HashLink
@@ -42,9 +42,9 @@ return (
     <header className="Container-Header w-full z-50">
     <nav className="Header-Nav flex items-center justify-center px-8 py-4 gap-12">
         <ul className="flex items-center gap-6">
-        <li><CleanHashLink to="/#trang-chu" offset={HEADER_OFFSET}>Trang chủ</CleanHashLink></li>
         <li><CleanHashLink to="/#du-an" offset={HEADER_OFFSET}>Dự án</CleanHashLink></li>
         <li><CleanHashLink to="/#hau-truong" offset={HEADER_OFFSET}>Hậu trường</CleanHashLink></li>
+        <li><CleanHashLink to="/#gioi-thieu" offset={HEADER_OFFSET}>Giới thiệu</CleanHashLink></li>
         </ul>
 
         <div className="flex-shrink-0">
@@ -53,11 +53,13 @@ return (
         </CleanHashLink>
         </div>
 
+        <div className="flex items-center gap-4">
         <ul className="flex items-center gap-6">
-        <li><CleanHashLink to="/#gioi-thieu" offset={HEADER_OFFSET}>Giới thiệu</CleanHashLink></li>
-        <li><CleanHashLink to="/#faq" offset={HEADER_OFFSET}>FAQ</CleanHashLink></li>
-        <li><CleanHashLink to="/#lien-he" offset={HEADER_OFFSET}>Liên hệ</CleanHashLink></li>
+            <li><CleanHashLink to="/#hoat-dong" offset={HEADER_OFFSET}>Hoạt động</CleanHashLink></li>
+            <li><CleanHashLink to="/#faq" offset={HEADER_OFFSET}>FAQ</CleanHashLink></li>
+            <li><CleanHashLink to="/#lien-he" offset={HEADER_OFFSET}>Liên hệ</CleanHashLink></li>
         </ul>
+        </div>
     </nav>
     </header>
 );
