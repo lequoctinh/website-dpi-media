@@ -1,4 +1,5 @@
 const express = require("express");
+const pool = require("../db"); 
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const path = require("path");

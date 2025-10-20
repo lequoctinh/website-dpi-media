@@ -1,5 +1,6 @@
 // server/scripts/seedAdmin.js
-require("dotenv").config();
+const express = require("express");
+const pool = require("../db"); 
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcrypt");
 

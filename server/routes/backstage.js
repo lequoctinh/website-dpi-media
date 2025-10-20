@@ -1,4 +1,5 @@
-const express = require('express');
+const express = require("express");
+const pool = require("../db"); 
 const mysql = require('mysql2/promise');
 const multer = require('multer');
 const path = require('path');
