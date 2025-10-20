@@ -1,69 +1,78 @@
 const express = require("express");
-const pool = require("../db"); 
 const router = express.Router();
-const mysql = require("mysql2");
+const pool = require("../db"); // dùng pool chung, bỏ mysql2 ở đây
 
+// GET /api/video-projeck
+router.get("/", async (req, res) => {
+  try {
+    const { category_id } = req.query;
+    let sql = "SELECT * FROM videoprojeck";
+    const params = [];
+    if (category_id) {
+      sql += " WHERE category_id = ?";
+      params.push(category_id);
+    }
+    sql += " ORDER BY created_at DESC";
 
-
-router.get("/", (req, res) => {
-  const { category_id } = req.query;
-  let query = `SELECT * FROM videoprojeck`;
-  const params = [];
-
-  if (category_id) {
-    query += ` WHERE category_id = ?`;
-    params.push(category_id);
+    const [rows] = await pool.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /video-projeck error:", err);
+    res.status(500).json({ error: "Database error" });
   }
-
-  query += ` ORDER BY created_at DESC`;
-
-  db.query(query, params, (err, results) => {
-    if (err) return res.status(500).json({ error: err }); 
-    res.json(results);
-  });
 });
 
-router.get("/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("SELECT * FROM videoprojeck WHERE id = ?", [id], (err, results) => {
-    if (err) return res.status(500).json({ error: err });
-    if (results.length === 0) return res.status(404).json({ message: "Không tìm thấy video" });
-    res.json(results[0]);
-  });
+// GET /api/video-projeck/:id
+router.get("/:id", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM videoprojeck WHERE id = ?", [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: "Không tìm thấy video" });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("GET /video-projeck/:id error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-router.post("/", (req, res) => {
-  const { title, youtube_url, video_id, poster, category_id } = req.body;
-  const query = `
-    INSERT INTO videoprojeck (title, youtube_url, video_id, poster, category_id) 
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  db.query(query, [title, youtube_url, video_id, poster, category_id], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.status(201).json({ id: result.insertId, message: "Đã thêm video thành công" });
-  });
+// POST /api/video-projeck
+router.post("/", async (req, res) => {
+  try {
+    const { title, youtube_url, video_id, poster, category_id } = req.body || {};
+    const [rs] = await pool.execute(
+      "INSERT INTO videoprojeck (title, youtube_url, video_id, poster, category_id) VALUES (?, ?, ?, ?, ?)",
+      [title, youtube_url, video_id, poster, category_id]
+    );
+    res.status(201).json({ id: rs.insertId, message: "Đã thêm video thành công" });
+  } catch (err) {
+    console.error("POST /video-projeck error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-router.put("/:id", (req, res) => {
-  const { id } = req.params;
-  const { title, youtube_url, video_id, poster, category_id } = req.body;
-  const query = `
-    UPDATE videoprojeck 
-    SET title = ?, youtube_url = ?, video_id = ?, poster = ?, category_id = ?
-    WHERE id = ?
-  `;
-  db.query(query, [title, youtube_url, video_id, poster, category_id, id], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
+// PUT /api/video-projeck/:id
+router.put("/:id", async (req, res) => {
+  try {
+    const { title, youtube_url, video_id, poster, category_id } = req.body || {};
+    await pool.execute(
+      "UPDATE videoprojeck SET title=?, youtube_url=?, video_id=?, poster=?, category_id=? WHERE id=?",
+      [title, youtube_url, video_id, poster, category_id, req.params.id]
+    );
     res.json({ message: "Cập nhật video thành công" });
-  });
+  } catch (err) {
+    console.error("PUT /video-projeck/:id error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("DELETE FROM videoprojeck WHERE id = ?", [id], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
+// DELETE /api/video-projeck/:id
+router.delete("/:id", async (req, res) => {
+  try {
+    await pool.execute("DELETE FROM videoprojeck WHERE id = ?", [req.params.id]);
     res.json({ message: "Đã xoá video thành công" });
-  });
+  } catch (err) {
+    console.error("DELETE /video-projeck/:id error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 module.exports = router;

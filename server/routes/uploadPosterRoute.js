@@ -1,27 +1,44 @@
 const express = require("express");
-const pool = require("../db"); 
+const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const router = express.Router();
+const fs = require("fs");
+
+
+const POSTERS_DIR = path.join(__dirname, "../uploads/posters");
+if (!fs.existsSync(POSTERS_DIR)) fs.mkdirSync(POSTERS_DIR, { recursive: true });
+
 
 const storage = multer.diskStorage({
-destination: (req, file, cb) => {
-    cb(null, "uploads/posters/");
-},
-filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
+destination: (_req, _file, cb) => cb(null, POSTERS_DIR),
+filename: (_req, file, cb) => {
+    const safe = file.originalname.replace(/[^\w.\-]+/g, "_");
+    cb(null, `${Date.now()}-${safe}`);
 },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+storage,
+limits: { fileSize: 10 * 1024 * 1024 }, 
+fileFilter: (_req, file, cb) => {
+    const ok = /^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype);
+    cb(ok ? null : new Error("Chỉ cho phép ảnh PNG/JPG/WebP/GIF"));
+},
+});
 
-router.post("/", upload.single("poster"), (req, res) => {
-if (!req.file) {
+router.post("/", (req, res) => {
+upload.single("poster")(req, res, (err) => {
+    if (err) {
+    const msg = err.message || "Lỗi upload";
+    return res.status(400).json({ error: msg });
+    }
+    if (!req.file) {
     return res.status(400).json({ error: "Không có file được gửi lên." });
-}
+    }
 
-res.status(200).json({ posterPath: `/uploads/posters/${req.file.filename}` });
+    const relPath = `/uploads/posters/${req.file.filename}`;
+    return res.status(200).json({ posterPath: relPath });
+});
 });
 
 module.exports = router;
