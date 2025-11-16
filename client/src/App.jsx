@@ -24,7 +24,7 @@ export default function App() {
         <Route path="/bao-gia" element={<QuotePage />} />
         <Route path="/hoat-dong/:slugOrId" element={<NewsDetail />} />
       </Route>
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/dpiadmin" element={<AdminLogin />} />
       <Route
         path="/admin"
         element={

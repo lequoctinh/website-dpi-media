@@ -26,11 +26,9 @@ const compression = require("compression");
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
 
-// Chỉ trust proxy khi chạy sau Nginx/Reverse Proxy (prod)
 if (isProd) app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
-// Helmet: tắt CSP mặc định (tuỳ app frontend), bật CORP: cross-origin để phục vụ ảnh
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -38,15 +36,12 @@ app.use(
   })
 );
 
-// Nén response
 app.use(compression());
 
-// Giới hạn body JSON (có thể chỉnh qua env nếu cần upload JSON lớn)
 const JSON_LIMIT = process.env.JSON_LIMIT || "1mb";
 app.use(express.json({ limit: JSON_LIMIT }));
 app.use(cookieParser());
 
-// --------------- CORS allow-list ---------------
 const ENV_ORIGINS = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
   .split(",")
   .map((s) => s.trim())
@@ -56,20 +51,17 @@ const ALLOWED_ORIGINS = Array.from(new Set(ENV_ORIGINS));
 
 const corsOptions = {
   origin(origin, cb) {
-    // cho phép tools/server-side không có Origin
     if (!origin) return cb(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    return cb(null, false); // sẽ trả 200 nhưng chặn CORS — đủ an toàn
+    return cb(null, false);
   },
   credentials: true,
   optionsSuccessStatus: 204,
 };
 
-// Preflight cho tất cả routes
 app.options("*", cors(corsOptions));
 app.use(cors(corsOptions));
 
-// --------- Rate limit cho toàn bộ /api (tuỳ chỉnh) ---------
 app.use(
   "/api",
   rateLimit({
@@ -80,11 +72,9 @@ app.use(
   })
 );
 
-// --------- Static files ----------
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/images", express.static(path.join(__dirname, "public")));
 
-// ------------------ Routes ------------------
 const adminRoutes = require("./routes/admin");
 const adminAuthRoutes = require("./routes/adminAuth");
 const backstageRoutes = require("./routes/backstage");

@@ -34,8 +34,6 @@ const onSubmit = async (e) => {
     const res = await fetch(`${API_BASE}/email/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Nếu backend KHÔNG cần cookie: không cần credentials
-        // Nếu backend có xác thực cookie → thêm: credentials: "include"
         body: JSON.stringify({ email: value }),
         signal: controller.signal,
     });
@@ -72,7 +70,6 @@ const onSubmit = async (e) => {
 
 return (
     <section id="lien-he" aria-labelledby="contact-heading" className="relative bg-black">
-    {/* glow nhẹ */}
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_0%,rgba(255,255,255,0.08),transparent_70%)]" />
     <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-20">
         <header className="mb-8 text-center">
@@ -88,9 +85,7 @@ return (
         </p>
         </header>
 
-        {/* khối 2 cột */}
         <div className="grid gap-6 md:grid-cols-2">
-        {/* Thông tin & subscribe */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <ul className="space-y-3 text-white/80">
             <li>
@@ -142,53 +137,89 @@ return (
             )}
         </div>
 
-        {/* Social links */}
         <div className="flex flex-col justify-center gap-3">
             <SocialItem
-            href="https://www.youtube.com/"
-            label="YouTube"
-            accent="bg-white/10"
-            icon={
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                <path d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3s-6.9 0-8.7.4A4 4 0 0 0 .5 6.2C0 8 0 12 0 12s0 4 .5 5.8a4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8C24 16 24 12 24 12s0-4-.5-5.8zM9.6 15.5V8.5L15.8 12l-6.2 3.5z" />
+                href="https://www.youtube.com/"
+                label="YouTube"
+                color="#FF0000"
+                icon={
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                    <path d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3s-6.9 0-8.7.4A4 4 0 0 0 .5 6.2C0 8 0 12 0 12s0 4 .5 5.8a4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8C24 16 24 12 24 12s0-4-.5-5.8zM9.6 15.5V8.5L15.8 12l-6.2 3.5z" />
                 </svg>
-            }
+                }
             />
+
             <SocialItem
-            href="https://www.facebook.com/profile.php?id=61573772364613"
-            label="Facebook"
-            accent="bg-white/10"
-            icon={
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.2V12h2.2V9.8c0-2.2 1.3-3.4 3.3-3.4.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2V12H16l-.4 2.9h-2.2v7A10 10 0 0 0 22 12z" />
+                href="https://www.facebook.com/profile.php?id=61573772364613"
+                label="Facebook"
+                color="#1877F2"
+                icon={
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                    <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.2V12h2.2V9.8c0-2.2 1.3-3.4 3.3-3.4.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2V12H16l-.4 2.9h-2.2v7A10 10 0 0 0 22 12z" />
                 </svg>
-            }
+                }
+            />
+
+            <SocialItem
+                href="https://zalo.me/0365701415"
+                label="Zalo"
+                color="#0068FF"
+                icon={
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    className="h-5 w-5"
+                    fill="currentColor"
+                >
+                    <path d="M26.8 25.2h3.7l-5.6 8.2h5.7v2.4h-9.5v-2l5.7-8.6zm8.8 0h2.6v10.6h-2.6V25.2zm8.2 0c2.8 0 4.6 1.5 4.6 4 0 2.5-1.9 4.1-4.6 4.1h-1.7v2.4h-2.6V25.2h4.3zm-1.7 5.8h1.5c1.3 0 2.1-.7 2.1-1.8s-.8-1.8-2.1-1.8h-1.5v3.6zm8.3-5.8h2.6v8.2h4.6v2.4h-7.2V25.2z" />
+                </svg>
+                }
             />
         </div>
-        </div>
+
+    </div>
         <p className="mt-8 text-center text-xs text-white/50">© Copyright by DPI MEDIA</p>
     </div>  
     </section>
 );
 }
 
-function SocialItem({ href, label, icon, accent }) {
+function SocialItem({ href, label, icon, color }) {
 return (
     <a
     href={href}
     target="_blank"
     rel="noreferrer"
-    className="group flex items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.03] px-4 py-3 text-white transition hover:bg-white/[0.06]"
+    className="group flex items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.03] px-4 py-3 text-white transition-all duration-300 hover:scale-[1.02]"
     >
-    <span className={`inline-grid place-items-center rounded-full ${accent} p-2 text-white/80 group-hover:text-white`}>
+    <span
+        className="inline-grid place-items-center rounded-full bg-white/10 p-2 text-white/80 transition-all duration-300 group-hover:text-white"
+    >
         {icon}
     </span>
+
     <span className="flex-1 font-medium">{label}</span>
-    <span className="inline-grid place-items-center rounded-full bg-white/10 p-2 text-white/80 transition group-hover:translate-x-1 group-hover:bg-white/20">
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+
+    <span className="inline-grid place-items-center rounded-full bg-white/10 p-2 text-white/80 transition-all duration-300 group-hover:translate-x-1">
+        <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4"
+        fill="currentColor"
+        aria-hidden="true"
+        >
         <path d="M13.5 4.5 21 12l-7.5 7.5-1.06-1.06L18.88 12l-6.44-6.44L13.5 4.5zM3 11.25h15v1.5H3v-1.5z" />
         </svg>
     </span>
+    <style jsx>{`
+        a:hover {
+        border-color: ${color}50;
+        background: linear-gradient(90deg, ${color}22, transparent 100%);
+        box-shadow: 0 0 10px ${color}55;
+        }
+        a:hover span:first-child {
+        background-color: ${color};
+        }
+    `}</style>
     </a>
 );
 }

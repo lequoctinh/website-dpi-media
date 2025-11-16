@@ -114,10 +114,8 @@ const onEdit = (row) => {
 const uploadPoster = async (file) => {
     const fd = new FormData();
     fd.append("poster", file); 
-    const { data } = await api.post("/upload-poster", fd, {
-    headers: { "Content-Type": "multipart/form-data" },
-    });
-    return data.posterPath; 
+    const { data } = await api.post("/upload-poster", fd);
+    return data.posterPath;
 };
 
 const onSubmit = async (e) => {
