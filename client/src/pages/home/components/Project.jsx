@@ -32,7 +32,7 @@ return (
 );
 };
 export default function Project() {
-const [categories, setCategories] = useState([]);
+const [categories, setCategories] = useState([]);   
 const [selectedCat, setSelectedCat] = useState(null);
 
 const [videos, setVideos] = useState([]);
@@ -41,7 +41,7 @@ const [err, setErr] = useState("");
 
 const [selectedVideo, setSelectedVideo] = useState(null);
 
-const perPage = 6;
+const perPage = 9;
 const [page, setPage] = useState(1);
 const totalPages = Math.max(1, Math.ceil(videos.length / perPage));
 const paged = useMemo(() => {

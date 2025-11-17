@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-const YOUTUBE_ID = "-dr-wvPjGFo";
+const YOUTUBE_ID = "m4bf5jsjn5k";
+
 const YT_EMBED = `https://www.youtube-nocookie.com/embed/${YOUTUBE_ID}?rel=0&modestbranding=1&playsinline=1&autoplay=1`;
 const YT_POSTER = `https://i.ytimg.com/vi/${YOUTUBE_ID}/maxresdefault.jpg`;
+
 
 export default function ShowReelsStage3D() {
 const stageRef = useRef(null);
