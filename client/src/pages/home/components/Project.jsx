@@ -161,7 +161,7 @@ return (
                         <span className="pointer-events-none absolute inset-0 rounded-xl">
                         <span className="absolute -left-1/3 top-0 h-full w-1/3 -skew-x-12 bg-white/15 opacity-0 transition duration-700 group-hover:translate-x-[220%] group-hover:opacity-100" />
                         </span>
-                        <h3 className="absolute left-3 right-3 top-3 line-clamp-2 text-lg font-semibold text-white drop-shadow">
+                        <h3 className="absolute left-3 right-3 top-3 line-clamp-2 text-[0.95rem] font-semibold text-white drop-shadow">
                         {v.title}
                         </h3>
                     </div>

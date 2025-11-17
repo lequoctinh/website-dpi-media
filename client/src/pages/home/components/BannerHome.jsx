@@ -12,7 +12,7 @@ return (
     "
     >
     <img
-        src="/bannerhome/C3_00829.avif"
+        src="/bannerhome/C3_00829.png"
         alt="Behind the scenes"
         className="absolute inset-0 h-full w-full object-cover object-center"
         loading="eager"
