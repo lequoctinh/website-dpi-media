@@ -9,6 +9,7 @@ const NAV = [
 { to: "/admin/projects",  label: "Dự án",      icon: "🧱" },
 { to: "/admin/categories",label: "Danh mục",   icon: "🏷️" },
 { to: "/admin/posts",      label: "Bài viết",   icon: "📰" },
+{ to: "/admin/partners",   label: "Đối tác",     icon: "🤝" },
 { to: "/admin/contacts",  label: "Liên hệ",    icon: "📬" },
 ];
 

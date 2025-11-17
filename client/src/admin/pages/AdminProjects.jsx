@@ -1,9 +1,12 @@
+// src/admin/pages/AdminProjects.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "../lib/api";                 // axios instance (baseURL = VITE_API_BASE)
+import { api } from "../lib/api"; // axios instance (baseURL = VITE_API_BASE)
 import toast, { Toaster } from "react-hot-toast";
 
-const API_BASE   = (import.meta.env.VITE_API_BASE || "").replace(/\/+$/, "");
-const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE || API_BASE.replace(/\/api$/, "")).replace(/\/+$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/+$/, "");
+const ASSET_BASE = (
+import.meta.env.VITE_ASSET_BASE || API_BASE.replace(/\/api$/, "")
+).replace(/\/+$/, "");
 const PER_PAGE = 8;
 
 const toImgUrl = (p) => {
@@ -30,22 +33,23 @@ return "";
 }
 
 export default function AdminProjects() {
-const [categories, setCategories] = useState([]);     
-const [list, setList] = useState([]);               
+const [categories, setCategories] = useState([]);
+const [list, setList] = useState([]);
 const [loading, setLoading] = useState(true);
 const [err, setErr] = useState("");
 
-const [categoryId, setCategoryId] = useState("");     
-const [query, setQuery] = useState("");               
+const [categoryId, setCategoryId] = useState("");
+const [query, setQuery] = useState("");
 const [page, setPage] = useState(1);
 
-const [editing, setEditing] = useState(null);         
+const [editing, setEditing] = useState(null);
 const titleRef = useRef(null);
 const urlRef = useRef(null);
 const videoIdRef = useRef(null);
 const catRef = useRef(null);
 const posterRef = useRef(null);
 const [preview, setPreview] = useState("");
+const [featured, setFeatured] = useState(false); // 🔥 video nổi bật
 const [submitting, setSubmitting] = useState(false);
 
 const loadCategories = async () => {
@@ -76,13 +80,15 @@ useEffect(() => {
 useEffect(() => {
     setPage(1);
     loadList();
-
 }, [categoryId]);
 
 const resetForm = () => {
     setEditing(null);
     setPreview("");
-    [titleRef, urlRef, videoIdRef, catRef, posterRef].forEach((r) => r.current && (r.current.value = ""));
+    setFeatured(false);
+    [titleRef, urlRef, videoIdRef, catRef, posterRef].forEach(
+    (r) => r.current && (r.current.value = "")
+    );
 };
 
 const onChangeUrl = () => {
@@ -104,16 +110,19 @@ const onEdit = (row) => {
     setEditing(row);
     if (titleRef.current) titleRef.current.value = row.title || "";
     if (urlRef.current) urlRef.current.value = row.youtube_url || "";
-    if (videoIdRef.current) videoIdRef.current.value = row.video_id || extractYoutubeId(row.youtube_url || "");
+    if (videoIdRef.current)
+    videoIdRef.current.value =
+        row.video_id || extractYoutubeId(row.youtube_url || "");
     if (catRef.current) catRef.current.value = String(row.category_id || "");
     if (posterRef.current) posterRef.current.value = "";
     setPreview(row.poster ? toImgUrl(row.poster) : "");
+    setFeatured(!!row.featured); // lấy trạng thái nổi bật
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const uploadPoster = async (file) => {
     const fd = new FormData();
-    fd.append("poster", file); 
+    fd.append("poster", file);
     const { data } = await api.post("/upload-poster", fd);
     return data.posterPath;
 };
@@ -146,23 +155,20 @@ const onSubmit = async (e) => {
         return toast.error("Vui lòng chọn poster.");
     }
 
-    if (editing) {
-        await api.put(`/video-projeck/${editing.id}`, {
+    const payload = {
         title,
         youtube_url,
         video_id,
         poster: posterPath,
         category_id: cat,
-        });
+        featured, // gửi trạng thái nổi bật
+    };
+
+    if (editing) {
+        await api.put(`/video-projeck/${editing.id}`, payload);
         toast.success("Cập nhật dự án thành công!");
     } else {
-        await api.post("/video-projeck", {
-        title,
-        youtube_url,
-        video_id,
-        poster: posterPath,
-        category_id: cat,
-        });
+        await api.post("/video-projeck", payload);
         toast.success("Tạo dự án thành công!");
     }
 
@@ -200,19 +206,22 @@ const paged = filtered.slice(start, start + PER_PAGE);
 useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     if (page < 1) setPage(1);
-}, [filtered.length, totalPages]); 
+}, [filtered.length, totalPages]);
 
-const catName = (id) => categories.find((c) => String(c.id) === String(id))?.name || "—";
+const catName = (id) =>
+    categories.find((c) => String(c.id) === String(id))?.name || "—";
 
 return (
     <div className="space-y-6">
     <Toaster position="top-right" />
 
+    {/* Header + filter */}
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
         <h1 className="text-2xl font-semibold text-white">Quản lý Dự án</h1>
         <p className="mt-1 text-sm text-zinc-400">
-            Tạo / cập nhật các video dự án (poster, liên kết YouTube, danh mục).
+            Tạo / cập nhật các video dự án (poster, liên kết YouTube, danh
+            mục, đánh dấu video nổi bật).
         </p>
         </div>
 
@@ -229,16 +238,23 @@ return (
         <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500/50">
+            className="rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500/50"
+        >
             <option value="">Tất cả danh mục</option>
             {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+                {c.name}
+            </option>
             ))}
         </select>
         </div>
     </div>
 
-    <form onSubmit={onSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    {/* Form */}
+    <form
+        onSubmit={onSubmit}
+        className="rounded-2xl border border-white/10 bg-white/5 p-4"
+    >
         <div className="grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <div className="space-y-3">
             <label className="block">
@@ -280,9 +296,13 @@ return (
                 defaultValue=""
                 className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-zinc-400 focus:ring-2 focus:ring-brand"
             >
-                <option value="" disabled>Chọn danh mục…</option>
+                <option value="" disabled>
+                Chọn danh mục…
+                </option>
                 {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                    {c.name}
+                </option>
                 ))}
             </select>
             </label>
@@ -293,12 +313,25 @@ return (
                 ref={posterRef}
                 type="file"
                 accept="image/*"
-                onChange={(e) => onPickPoster(e)}
+                onChange={onPickPoster}
                 className="mt-1 w-full cursor-pointer rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-sm text-white file:mr-3 file:rounded-md file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-sm file:text-white hover:file:bg-white/20"
             />
             <p className="mt-1 text-xs text-zinc-500">
-                {editing ? "Đang sửa: có thể bỏ qua nếu không muốn thay poster." : "Chọn poster cho dự án."}
+                {editing
+                ? "Đang sửa: có thể bỏ qua nếu không muốn thay poster."
+                : "Chọn poster cho dự án."}
             </p>
+            </label>
+
+            {/* Featured checkbox */}
+            <label className="mt-2 flex items-center gap-2 text-sm text-zinc-300">
+            <input
+                type="checkbox"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="h-4 w-4 rounded border-white/40 bg-black/40"
+            />
+            Đặt video này là <span className="font-semibold text-amber-300">Nổi bật</span> (ưu tiên lên đầu danh sách)
             </label>
         </div>
 
@@ -306,7 +339,11 @@ return (
             <span className="text-sm text-zinc-300">Xem trước poster</span>
             <div className="relative aspect-[16/9] overflow-hidden rounded-xl border border-white/10 bg-white/5">
             {preview ? (
-                <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                <img
+                src={preview}
+                alt="Preview"
+                className="h-full w-full object-cover"
+                />
             ) : (
                 <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">
                 Chưa có ảnh xem trước
@@ -356,7 +393,10 @@ return (
         <>
             <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paged.map((v) => (
-                <article key={v.id} className="group overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                <article
+                key={v.id}
+                className="group overflow-hidden rounded-xl border border-white/10 bg-white/5"
+                >
                 <div className="relative aspect-[16/9]">
                     <img
                     src={toImgUrl(v.poster)}
@@ -364,11 +404,20 @@ return (
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     loading="lazy"
                     />
+                    {v.featured ? (
+                    <span className="absolute left-2 top-2 rounded-full bg-amber-500/90 px-2 py-0.5 text-[11px] font-semibold text-black shadow">
+                        NỔI BẬT
+                    </span>
+                    ) : null}
                 </div>
                 <div className="flex items-start justify-between gap-2 p-3">
                     <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-white">{v.title}</p>
-                    <p className="mt-0.5 text-xs text-zinc-400">Danh mục: {catName(v.category_id)}</p>
+                    <p className="truncate text-sm font-medium text-white">
+                        {v.title}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-400">
+                        Danh mục: {catName(v.category_id)}
+                    </p>
                     <p className="mt-0.5 text-xs text-zinc-500">ID: {v.id}</p>
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -403,9 +452,14 @@ return (
             <div className="text-xs text-zinc-400">
                 Đang hiển thị{" "}
                 <span className="text-zinc-200">
-                {filtered.length === 0 ? 0 : start + 1}–{Math.min(start + PER_PAGE, filtered.length)}
+                {filtered.length === 0
+                    ? 0
+                    : start + 1}
+                –
+                {Math.min(start + PER_PAGE, filtered.length)}
                 </span>{" "}
-                / <span className="text-zinc-200">{filtered.length}</span> dự án
+                /{" "}
+                <span className="text-zinc-200">{filtered.length}</span> dự án
             </div>
 
             <div className="flex items-center gap-2">
@@ -418,24 +472,30 @@ return (
                 </button>
 
                 <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(7, totalPages) }).map((_, i) => {
+                {Array.from({ length: Math.min(7, totalPages) }).map(
+                    (_, i) => {
                     const p = i + 1;
                     const active = p === page;
                     return (
-                    <button
+                        <button
                         key={p}
                         onClick={() => setPage(p)}
                         className={`h-8 w-8 rounded-md border text-sm ${
-                        active
+                            active
                             ? "border-white/20 bg-white/20 text-white"
                             : "border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
                         }`}
-                    >
+                        >
                         {p}
-                    </button>
+                        </button>
                     );
-                })}
-                {totalPages > 7 && <span className="px-1 text-sm text-zinc-400">… {totalPages}</span>}
+                    }
+                )}
+                {totalPages > 7 && (
+                    <span className="px-1 text-sm text-zinc-400">
+                    … {totalPages}
+                    </span>
+                )}
                 </div>
 
                 <button

@@ -85,6 +85,8 @@ const uploadPosterRoute = require("./routes/uploadPosterRoute");
 const contactRoutes = require("./routes/contactRoutes");
 const adminContactsRoutes = require("./routes/adminContacts");
 const baiVietRoutes = require("./routes/baiVietRoutes");
+const partnerRoutes = require("./routes/partnerRoutes");
+
 
 // Healthcheck
 app.get(["/health", "/api/health"], (_req, res) =>
@@ -102,6 +104,8 @@ app.use("/api/upload-poster", uploadPosterRoute);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/admin/contacts", adminContactsRoutes);
 app.use("/api/bai-viet", baiVietRoutes);
+app.use("/api/partners", partnerRoutes);
+
 
 // 404
 app.use((req, res, next) => {

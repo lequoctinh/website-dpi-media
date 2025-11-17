@@ -14,6 +14,7 @@ import AdminProjects from "./admin/pages/AdminProjects";
 import AdminCategories from "./admin/pages/AdminCategories";
 import AdminContacts from "./admin/pages/AdminContacts";
 import AdminPosts from "./admin/pages/AdminPosts";
+import AdminPartners from "./admin/pages/AdminPartners";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="projects" element={<AdminProjects/>} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="contacts" element={<AdminContacts />} />
+        <Route path="partners" element={<AdminPartners />} />
         <Route path="posts" element={<AdminPosts />} />
       </Route>
     </Routes>
