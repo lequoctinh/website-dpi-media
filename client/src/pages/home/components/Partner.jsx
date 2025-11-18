@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../api/api";
 
 // Build URL ảnh từ path DB
@@ -14,12 +14,13 @@ return `${ASSET_BASE}${path}`;
 };
 
 const logoVariants = {
-hidden: { opacity: 0, y: 12 },
+hidden: { opacity: 0, y: 10, scale: 0.96 },
 visible: (i) => ({
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-    delay: 0.05 * i,
+    delay: 0.03 * i,
     duration: 0.35,
     ease: "easeOut",
     },
@@ -34,9 +35,12 @@ industry: row.industry,
 website_url: row.website_url,
 });
 
+const PAGE_SIZE = 8; // mỗi trang hiển thị 8 logo
+
 export default function Partner() {
 const [items, setItems] = useState([]);
 const [loading, setLoading] = useState(true);
+const [page, setPage] = useState(0);
 
 useEffect(() => {
     let mounted = true;
@@ -69,6 +73,38 @@ useEffect(() => {
 
 const hasData = useMemo(() => items.length > 0, [items.length]);
 
+// Chia items thành các "trang" logo
+const pages = useMemo(() => {
+    if (!items.length) return [];
+    const chunks = [];
+    for (let i = 0; i < items.length; i += PAGE_SIZE) {
+    chunks.push(items.slice(i, i + PAGE_SIZE));
+    }
+    return chunks;
+}, [items]);
+
+// Lấy vài industry để show chip bên trên (nếu có)
+const industries = useMemo(() => {
+    const s = new Set();
+    items.forEach((it) => {
+    if (it.industry) s.add(it.industry);
+    });
+    return Array.from(s).slice(0, 5);
+}, [items]);
+
+// Auto chuyển trang mượt
+useEffect(() => {
+    if (!pages.length) return;
+    // reset page nếu data mới ít hơn
+    if (page >= pages.length) setPage(0);
+
+    const timer = setInterval(() => {
+    setPage((prev) => (prev + 1) % pages.length);
+    }, 4800); // ~4.8s đổi trang
+
+    return () => clearInterval(timer);
+}, [pages.length, page]);
+
 return (
     <section className="relative bg-black py-16">
     {/* Glow nền nhẹ cho hợp các section khác */}
@@ -77,7 +113,7 @@ return (
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_50%_0%,rgba(255,255,255,0.12),transparent_60%)]"
     />
     <div className="relative mx-auto max-w-7xl px-4">
-        {/* Header */}
+        {/* Header – giữ nguyên theo yêu cầu */}
         <div className="mb-10 text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -85,12 +121,13 @@ return (
         </p>
 
         <h2 className="mt-4 text-2xl font-bold text-white md:text-3xl">
-            Đối tác đã tin tưởng{" "}
+            Đối tác đã đồng hành cùng{" "}
             <span className="text-white/70">DPI Media</span>
         </h2>
-        <p className="mt-2 text-sm text-white/70">
-            Hơn 120 dự án được thực hiện cùng nhiều thương hiệu ở đa dạng
-            ngành hàng
+        <p className="mt-2 text-sm text-white/70 max-w-xl mx-auto">
+            Đơn vị sản xuất nội dung, thương hiệu, doanh nghiệp ở đa dạng lĩnh vực
+            đã lựa chọn DPI Media cho các chiến dịch truyền thông, TVC, livestream
+            và nội dung số.
         </p>
         </div>
 
@@ -110,83 +147,152 @@ return (
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="
-            relative overflow-hidden rounded-3xl border border-white/12
-            bg-[radial-gradient(circle_at_0_0,rgba(255,255,255,0.14),transparent_55%),rgba(15,23,42,0.95)]
-            shadow-[0_18px_70px_rgba(0,0,0,0.95)]
-            px-4 py-6 md:px-6 md:py-8
+            relative overflow-hidden rounded-3xl border border-white/10
+            bg-black/60 backdrop-blur-md
+            shadow-[0_20px_70px_rgba(0,0,0,0.85)]
+            px-5 py-6 md:px-8 md:py-8
             "
         >
-            <div className="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)] md:items-center">
-            {/* Khối giới thiệu bên trái */}
-            <div className="space-y-4 text-white/80">
+            {/* Top row: content + stats + chip ngành */}
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3 text-left max-w-xl">
                 <h3 className="text-lg font-semibold text-white md:text-xl">
-                Thương hiệu đồng hành cùng DPI Media
+                Thương hiệu tin tưởng DPI Media
                 </h3>
                 <p className="text-sm text-white/70">
-                Từ nội thất, ô tô, điện máy đến làm đẹp – DPI Media đã thực
-                hiện các chiến dịch quay dựng, livestream và nội dung sáng
-                tạo cho nhiều doanh nghiệp khác nhau.
+                Chúng tôi đồng hành cùng doanh nghiệp trong việc xây dựng hình ảnh,
+                kể câu chuyện thương hiệu và lan tỏa thông điệp qua video, hình ảnh,
+                TVC, livestream và nội dung digital.
                 </p>
 
-                <div className="flex flex-wrap gap-4 text-sm">
+                {industries.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                    {industries.map((ind) => (
+                    <span
+                        key={ind}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/70"
+                    >
+                        {ind}
+                    </span>
+                    ))}
+                </div>
+                )}
+            </div>
+
+            <div className="flex gap-6 text-sm text-white/80">
                 <div>
-                    <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-white leading-tight">
                     120+
-                    </div>
-                    <div className="text-xs uppercase tracking-[0.16em] text-white/60">
-                    Dự án / năm
-                    </div>
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-white/60">
+                    Chiến dịch mỗi năm
+                </div>
                 </div>
                 <div className="h-10 w-px bg-white/15" />
                 <div>
-                    <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-white leading-tight">
                     {items.length}
-                    </div>
-                    <div className="text-xs uppercase tracking-[0.16em] text-white/60">
-                    Thương hiệu tiêu biểu
-                    </div>
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-white/60">
+                    Đối tác tiêu biểu
                 </div>
                 </div>
-
-                <p className="text-xs text-white/55">
-                Logo hiển thị dưới đây chỉ là một phần nhỏ trong số các đối
-                tác đã và đang đồng hành cùng DPI Media.
-                </p>
+            </div>
             </div>
 
-            {/* Lưới logo bên phải */}
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 md:mt-0">
-                {items.map((logo, i) => (
+            {/* Slider dạng "trang" – fade mượt, không chạy ngang */}
+            <div className="space-y-4">
+            <div className="relative overflow-hidden min-h-[120px] md:min-h-[150px]">
+                <AnimatePresence mode="wait">
                 <motion.div
-                    key={logo.id || logo.logo || i}
-                    custom={i}
-                    variants={logoVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.3 }}
+                    key={page}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.45, ease: "easeOut" }}
                     className="
-                    group flex items-center justify-center
-                    rounded-2xl bg-black/50 px-4 py-3
-                    ring-1 ring-white/5
-                    transition-all duration-300
-                    hover:bg-black/70 hover:ring-white/30
+                    grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4
+                    gap-4 md:gap-5
                     "
                 >
-                    <motion.img
-                    src={toImgUrl(logo.logo)}
-                    alt={logo.name || "Partner"}
-                    className="
-                        max-h-10 w-full max-w-[140px] object-contain
-                        opacity-60 grayscale
-                        transition-all duration-300
-                        group-hover:opacity-100 group-hover:grayscale-0
-                    "
-                    whileHover={{ scale: 1.06 }}
-                    />
+                    {pages[page].map((logo, i) => {
+                    const imgEl = (
+                        <motion.img
+                        src={toImgUrl(logo.logo)}
+                        alt={logo.name || "Partner"}
+                        className="
+                            max-h-10 w-full max-w-[150px] object-contain
+                            opacity-100
+                            transition-all duration-300
+                            drop-shadow-[0_0_12px_rgba(0,0,0,0.7)]
+                        "
+                        whileHover={{ scale: 1.06 }}
+                        />
+                    );
+
+                    const inner = logo.website_url ? (
+                        <a
+                        href={logo.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center w-full h-full"
+                        aria-label={logo.name || "Partner"}
+                        >
+                        {imgEl}
+                        </a>
+                    ) : (
+                        imgEl
+                    );
+
+                    return (
+                        <motion.div
+                        key={logo.id || logo.logo || i}
+                        custom={i}
+                        variants={logoVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.2 }}
+                        className="
+                            flex items-center justify-center
+                            rounded-2xl px-4 py-3
+                            bg-white/5
+                            ring-1 ring-white/10
+                            transition-all duration-300
+                            hover:-translate-y-1 hover:bg-white/12 hover:ring-[rgba(255,255,255,0.55)]
+                            hover:shadow-[0_16px_40px_rgba(0,0,0,0.75)]
+                        "
+                        >
+                        {inner}
+                        </motion.div>
+                    );
+                    })}
                 </motion.div>
+                </AnimatePresence>
+            </div>
+
+            {pages.length > 1 && (
+                <div className="flex justify-center gap-2 pt-1">
+                {pages.map((_, idx) => (
+                    <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setPage(idx)}
+                    className={`
+                        h-1.5 rounded-full transition-all duration-300
+                        ${idx === page ? "w-5 bg-white" : "w-2 bg-white/40 hover:bg-white/70"}
+                    `}
+                    aria-label={`Trang logo ${idx + 1}`}
+                    />
                 ))}
+                </div>
+            )}
             </div>
-            </div>
+
+            <p className="mt-5 text-xs text-white/45 text-left">
+            * Danh sách trên chỉ là một phần đối tác đã hợp tác cùng DPI Media ở
+            nhiều định dạng: TVC, viral clip, social video, livestream, sự kiện
+            và các hoạt động truyền thông khác.
+            </p>
         </motion.div>
         )}
     </div>
