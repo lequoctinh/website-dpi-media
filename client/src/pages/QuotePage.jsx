@@ -112,7 +112,10 @@ const onBudgetBlur = () => {
     setField("budget", formatted);
 };
 
-const onBudgetPreset = (preset) => setField("budget", preset);
+const onBudgetPreset = (preset) => {
+    setField("budget", preset);
+    setErrors((s) => ({ ...s, budget: "" }));
+};
 
 const isValid = useMemo(() => {
     const ok =
@@ -158,7 +161,7 @@ const onSubmit = async (e) => {
     try {
     const res = await fetch(`${API_BASE}/api/email/quote`, { method: "POST", body: payload });
     if (!res.ok) throw new Error("request failed");
-    setStatus({ type: "ok", msg: "✅ Đã nhận yêu cầu. DPI Media sẽ liên hệ sớm!" });
+    setStatus({ type: "ok", msg: "✅ Đã nhận yêu cầu. DPI MEDIA sẽ liên hệ sớm!" });
     setForm({
         name: "",
         phone: "",
@@ -189,7 +192,7 @@ return (
         <header className="mb-8 text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-            Báo giá nhanh — DPI Media
+            Báo giá nhanh — DPI MEDIA
         </p>
         <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">Cho chúng tôi biết nhu cầu của bạn</h1>
         <p className="mx-auto mt-3 max-w-2xl text-white/70">Điền form (≈1–2 phút). Chúng tôi phản hồi với đề xuất & khung chi phí phù hợp.</p>
@@ -370,7 +373,7 @@ return (
             <label className="flex items-start gap-3 text-sm text-white/80">
                 <input type="checkbox" name="agree" checked={form.agree} onChange={onChange} className="mt-1 h-4 w-4 accent-white" required />
                 <span>
-                Tôi đồng ý để DPI Media liên hệ và xử lý thông tin nhằm tư vấn báo giá.
+                Tôi đồng ý để DPI MEDIA liên hệ và xử lý thông tin nhằm tư vấn báo giá.
                 <span className="text-white/50"> (Có thể yêu cầu xóa dữ liệu bất kỳ lúc nào.)</span>
                 </span>
             </label>
@@ -384,20 +387,23 @@ return (
                 Thời gian phản hồi dự kiến: <span className="text-white/70">trong ngày làm việc</span>.
                 </p>
                 <button
-                type="submit"
-                disabled={!isValid}
-                className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition ${
-                    isValid ? "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:opacity-95" : "cursor-not-allowed bg-white/10 text-white/40"
-                }`}
-                >
-                {submitting && (
-                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" />
-                    </svg>
-                )}
-                {submitting ? "Đang gửi…" : "Gửi báo giá"}
-                </button>
+                    type="submit"
+                    disabled={!isValid}
+                    className={`group relative inline-flex items-center justify-center gap-3 rounded-full px-10 py-4 text-sm font-bold uppercase tracking-widest transition-all duration-500 ${
+                        isValid 
+                        ? "bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-[0_10px_30px_rgba(244,63,94,0.3)] hover:scale-105 hover:shadow-[0_15px_40px_rgba(244,63,94,0.4)] active:scale-95" 
+                        : "cursor-not-allowed bg-white/10 text-white/40"
+                    }`}
+                    >
+                    {submitting && (
+                        <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                    )}
+                    <span>{submitting ? "Đang gửi hồ sơ..." : "Gửi yêu cầu báo giá"}</span>
+                    {!submitting && <svg className="transition-transform group-hover:translate-x-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
+                    </button>
             </div>
 
             {status.msg && (
@@ -416,7 +422,7 @@ return (
         <p className="mt-6 text-center text-xs text-white/50">
         Cần hỗ trợ nhanh? Gọi{" "}
         <a href="tel:0982561914" className="text-white/80 underline underline-offset-4">
-            098 2561 914
+            036 570 1415
         </a>{" "}
         hoặc nhắn Zalo.
         </p>
@@ -446,14 +452,21 @@ return <p className="mt-1 text-xs text-rose-300">{children}</p>;
 }
 
 function CardRadio({ name, value, checked, onChange, children }) {
-return (
+  return (
     <label
-    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 ${
-        checked ? "border-transparent bg-white text-gray-900" : "border-white/10 bg-white/[0.04] text-white/90 hover:bg-white/[0.06]"
+    className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-4 transition-all duration-300 ${
+        checked 
+        ? "border-rose-500 bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.2)]" 
+        : "border-white/10 bg-white/[0.04] text-white/90 hover:bg-white/[0.08]"
     }`}
     >
+    <div className="flex items-center gap-3">
+        <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${checked ? 'border-rose-500' : 'border-white/30'}`}>
+        {checked && <div className="h-2 w-2 rounded-full bg-rose-500" />}
+        </div>
+        <span className={`text-sm font-medium ${checked ? 'text-white' : 'text-white/70'}`}>{children}</span>
+    </div>
     <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="hidden" required />
-    {children}
     </label>
 );
 }

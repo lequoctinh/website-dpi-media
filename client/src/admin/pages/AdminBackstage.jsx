@@ -38,7 +38,7 @@ const pagedItems = items.slice(startIdx, endIdx);
 useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     if (page < 1) setPage(1);
-}, [items.length, perPage, totalPages]); // eslint-disable-line
+}, [items.length, perPage, totalPages]);
 
 
 const load = async () => {
@@ -59,7 +59,6 @@ useEffect(() => {
     load();
 }, []);
 
-// ------- FORM HANDLERS -------
 const resetForm = () => {
     setEditing(null);
     setPreview("");

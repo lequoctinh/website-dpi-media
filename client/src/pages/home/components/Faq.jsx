@@ -11,7 +11,7 @@ const QA = [
 
 },
 {
-    q: "DPI Media cung cấp những dịch vụ nào?",
+    q: "DPI MEDIA cung cấp những dịch vụ nào?",
     a: "Chúng tôi sản xuất TVC, social video, 3D/Animation, VFX, livestream sự kiện, OOH và trọn gói từ tiền kỳ—hậu kỳ."
 },
 {
@@ -64,11 +64,12 @@ return (
             Câu hỏi thường gặp
         </p>
         <h2 id="faq-heading" className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
-            Tò mò về <span className="text-white/70">DPI Media</span>?
+            Tò mò về <span className="text-white/70">DPI MEDIA</span>?
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-white/70">
             Đây là các thắc mắc phổ biến. Nếu cần thêm, cứ nhắn cho chúng tôi.
         </p>
+        <div className="mx-auto mt-4 mb-2 h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" />
         </header>
 
         {/* Card wrapper */}

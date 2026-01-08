@@ -1,7 +1,7 @@
 // FILE: src/admin/pages/AdminLogin.jsx
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../lib/api"; // chỉnh lại path nếu bạn để khác
+import { api } from "../lib/api"; 
 
 export default function AdminLogin() {
 const navigate = useNavigate();

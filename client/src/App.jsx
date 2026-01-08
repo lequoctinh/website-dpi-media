@@ -4,6 +4,8 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./layouts";              // layout client
 import Home from "./pages/home/Home";
 import QuotePage from "./pages/QuotePage";
+import NewsDetail from "./pages/news/NewsDetail";
+import NewsList from "./pages/news/NewsList";
 // admin
 import AdminLogin from "./admin/pages/AdminLogin";
 import Dashboard from "./admin/pages/Dashboard";
@@ -22,6 +24,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/bao-gia" element={<QuotePage />} />
+        <Route path="/tin-tuc" element={<NewsList />} />
+        <Route path="/tin-tuc/:slug" element={<NewsDetail />} />
       </Route>
       <Route path="/dpiadmin" element={<AdminLogin />} />
       <Route

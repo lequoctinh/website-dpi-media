@@ -111,9 +111,10 @@ return (
             Dự Án
         </p>
         <h2 id="projects-heading" className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-4xl">
-            Dự án của <span className="text-white/70">DPI Media</span>
+            Dự án của <span className="text-white/70">DPI MEDIA</span>
         </h2>
         <p className="mt-3 text-white/70">Chọn danh mục để xem các Commercial, TVC, social video… đã thực hiện.</p>
+        <div className="mx-auto mt-4 mb-2 h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" />
         </header>
 
         <nav aria-label="Lọc danh mục dự án" className="mb-8 flex flex-wrap items-center justify-center gap-2">

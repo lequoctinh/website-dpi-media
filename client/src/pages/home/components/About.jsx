@@ -16,7 +16,7 @@ return (
         <header className="mx-auto max-w-4xl text-center">
         <img
             src="/logoconty.png"
-            alt="DPI Media"
+            alt="DPI MEDIA"
             className="mx-auto h-16 w-auto md:h-20"
         />
         <h2
@@ -31,7 +31,7 @@ return (
         </h2>
 
         <p className="mx-auto mt-3 max-w-2xl text-white/70">
-            DPI Media sinh ra từ một câu hỏi rất đơn giản: làm sao để mỗi nội dung
+            DPI MEDIA sinh ra từ một câu hỏi rất đơn giản: làm sao để mỗi nội dung
             thương mại vẫn giữ được cảm xúc như một bộ phim ngắn, nhưng lại phục vụ
             rõ ràng cho mục tiêu kinh doanh của khách hàng.
         </p>
@@ -61,7 +61,6 @@ return (
         </div>
         </header>
 
-        {/* USP / giá trị cốt lõi */}
         <div className="mt-12 grid gap-4 md:grid-cols-3">
         <USP
             icon={
@@ -101,19 +100,17 @@ return (
         />
         </div>
 
-        {/* Stats / trust */}
         <div className="mt-10 grid items-stretch gap-4 md:grid-cols-3">
         <Stat kpi="120+" label="dự án đã hoàn thành" />
         <Stat kpi="4.9/5" label="điểm hài lòng từ khách hàng" />
         <Stat kpi="10+" label="ngành hàng đã thực hiện" />
         </div>
 
-        {/* Quy trình gọn */}
         <section className="mt-14 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-6">
         <h3 className="text-lg font-semibold text-white">Quy trình 4 bước</h3>
         <p className="mt-2 text-sm text-white/65 max-w-2xl">
             Chúng tôi tin rằng một quy trình rõ ràng giúp cả hai phía yên tâm hơn. Từ
-            lúc bạn mới có ý tưởng đến khi video được xuất bản, DPI Media luôn đồng
+            lúc bạn mới có ý tưởng đến khi video được xuất bản, DPI MEDIA luôn đồng
             hành ở từng bước.
         </p>
         <ol className="mt-4 grid gap-4 md:grid-cols-4">
@@ -140,11 +137,10 @@ return (
         </ol>
         </section>
 
-        {/* CTA cuối */}
         <div className="mt-10 max-w-2xl mx-auto text-center">
         <p className="text-sm md:text-base text-white/70">
             Nếu bạn đã có một ý tưởng, một chiến dịch hoặc chỉ là vài dòng mô tả,
-            DPI Media rất sẵn sàng ngồi xuống, nghe bạn chia sẻ và cùng vẽ ra kế hoạch
+            DPI MEDIA rất sẵn sàng ngồi xuống, nghe bạn chia sẻ và cùng vẽ ra kế hoạch
             phù hợp nhất cho thương hiệu.
         </p>
 

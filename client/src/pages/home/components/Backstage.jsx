@@ -44,6 +44,7 @@ return (
             Hậu trường <span className="text-white/70">sản xuất</span>
         </h2>
         <p className="mt-3 text-white/70">Những khoảnh khắc trên set – năng lượng, kỷ luật và sáng tạo.</p>
+        <div className="mx-auto mt-4 mb-2 h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" />
         </header>
 
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4">

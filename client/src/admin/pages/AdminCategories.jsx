@@ -10,7 +10,6 @@ const [editing, setEditing] = useState(null);
 
 const nameRef = useRef(null);
 
-// fetch categories
 const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -29,7 +28,6 @@ useEffect(() => {
     fetchCategories();
 }, []);
 
-// submit thêm/sửa
 const handleSubmit = async (e) => {
     e.preventDefault();
     const name = nameRef.current?.value.trim();
@@ -46,14 +44,12 @@ const handleSubmit = async (e) => {
     setEditing(null);
     nameRef.current.value = "";
 
-    // reload trang
     setTimeout(() => window.location.reload(), 1200);
     } catch {
     toast.error("Lưu thất bại!");
     }
 };
 
-// xoá
 const handleDelete = async (id) => {
     if (!window.confirm("Xóa danh mục này?")) return;
     try {
@@ -67,10 +63,8 @@ const handleDelete = async (id) => {
 
 return (
     <div className="space-y-6">
-    {/* toast container */}
     <Toaster position="top-right" reverseOrder={false} />
 
-    {/* header */}
     <div>
         <h1 className="text-2xl font-semibold text-white">Quản lý Danh mục</h1>
         <p className="mt-1 text-sm text-zinc-400">
@@ -78,7 +72,6 @@ return (
         </p>
     </div>
 
-    {/* form thêm/sửa */}
     <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-4 md:flex-row"
@@ -110,7 +103,6 @@ return (
         )}
     </form>
 
-    {/* danh sách */}
     <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
         {loading ? (
         <div className="p-4 text-sm text-zinc-400">Đang tải...</div>

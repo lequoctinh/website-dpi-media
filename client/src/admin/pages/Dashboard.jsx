@@ -111,7 +111,6 @@ return (
 function StatCard({ title, value, hint, loading, accent, chip, icon }) {
 return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-    {/* soft gradient blob */}
     <div
         aria-hidden
         className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${accent} blur-2xl`}

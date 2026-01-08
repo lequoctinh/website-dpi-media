@@ -51,11 +51,9 @@ const onKeyPlay = (e) => {
 
 return (
     <section className="relative bg-black">
-    {/* light bloom nhẹ */}
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(255,255,255,0.14),transparent_70%)]" />
 
     <div className="relative mx-auto max-w-7xl px-4 py-14 md:py-20">
-        {/* Kicker theo brand */}
         <div className="mb-6 flex items-center gap-2 text-white/80">
         <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
         <span className="text-xs uppercase tracking-wider">
@@ -63,7 +61,6 @@ return (
         </span>
         </div>
 
-        {/* Stage 3D */}
         <div
         ref={stageRef}
         onPointerMove={handlePointerMove}
@@ -89,7 +86,6 @@ return (
             className="lg:col-span-12"
         >
             <div className="relative overflow-hidden rounded-3xl ring-1 ring-white/10">
-            {/* Background visual – giữ nguyên nhưng copy lại text cho hợp brand */}
             <div className="w-full bg-black/60">
                 <div className="mx-auto max-w-full px-4 py-6 md:py-8">
                 <div className="relative">
@@ -108,9 +104,7 @@ return (
                 </div>
             </div>
 
-            {/* Content + video */}
             <div className="relative z-10 grid gap-8 px-2 pb-2 pt-1 lg:grid-cols-12">
-                {/* LEFT: nội dung thuyết phục */}
                 <div
                 className="lg:col-span-5"
                 style={{
@@ -128,7 +122,6 @@ return (
                     nhanh nhất để xem chúng tôi có “hợp vibe” với bạn hay không.
                 </p>
 
-                {/* Bullet “lý do xem showreel” */}
                 <ul className="mt-4 space-y-2 text-sm text-white/80">
                     <li className="flex gap-2">
                     <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -144,7 +137,6 @@ return (
                     </li>
                 </ul>
 
-                {/* CTA */}
                 <div className="mt-5 flex flex-wrap items-center gap-3">
                     <a
                     href="#du-an"
@@ -160,7 +152,6 @@ return (
                     </a>
                 </div>
 
-                {/* Trust mini */}
                 <div className="mt-6 flex flex-wrap gap-6 text-white/80">
                     <div>
                     <div className="text-2xl font-bold">4.9/5</div>
@@ -178,7 +169,6 @@ return (
                 </div>
                 </div>
 
-                {/* RIGHT: video YouTube */}
                 <div
                 className="lg:col-span-7"
                 style={{

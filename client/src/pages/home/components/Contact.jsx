@@ -8,7 +8,6 @@ const [status, setStatus] = useState({ type: "", msg: "" });
 const [loading, setLoading] = useState(false);
 const abortRef = useRef(null);
 
-// ---- GIỮ LOGIC CŨ ----
 const isValidEmail = useMemo(
     () => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()),
     [email]
@@ -68,7 +67,6 @@ const onSubmit = async (e) => {
     abortRef.current = null;
     }
 };
-// ---- HẾT PHẦN LOGIC ----
 
 return (
     <section
@@ -76,14 +74,12 @@ return (
     aria-labelledby="contact-heading"
     className="relative bg-black"
     >
-    {/* glow nền nhẹ */}
     <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_-20%,rgba(255,255,255,.10),transparent)]"
     />
 
     <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-20">
-        {/* HEADER */}
         <header className="mb-10 text-center">
         <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -94,22 +90,21 @@ return (
             className="mt-4 bg-gradient-to-b from-white to-white/70 bg-clip-text text-3xl font-extrabold leading-tight text-transparent md:text-4xl"
         >
             Đặt lịch quay / sản xuất nội dung cùng{" "}
-            <span className="text-white">DPI Media</span>
+            <span className="text-white">DPI MEDIA</span>
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base text-white/70">
             Cho chúng tôi biết cách liên lạc và loại nội dung bạn đang cần. Đội
             ngũ tư vấn sẽ phản hồi trong vòng <strong>24 giờ làm việc</strong>.
         </p>
+        <div className="mx-auto mt-4 mb-2 h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" />
         </header>
 
-        {/* LAYOUT 2 CỘT */}
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-stretch">
-        {/* CỘT TRÁI: story + info nhanh */}
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-8">
             <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-[#ff5a7b] to-[#ff8a1a] opacity-25 blur-3xl" />
             <div className="relative">
             <h3 className="text-lg md:text-xl font-semibold text-white">
-                Bạn chia sẻ brief, DPI Media lo phần còn lại
+                Bạn chia sẻ brief, DPI MEDIA lo phần còn lại
             </h3>
             <p className="mt-3 text-sm text-white/70">
                 Dù bạn đang chuẩn bị{" "}
@@ -141,7 +136,7 @@ return (
                     Booking & tư vấn
                 </p>
                 <p className="mt-1 font-semibold text-white">
-                    (+84) 98 256 19 14
+                    (+84)36 570 1415
                 </p>
                 <a
                     href="mailto:info@dpimedia.pro"
@@ -164,15 +159,13 @@ return (
 
             <p className="mt-5 text-xs text-white/50">
                 Không có brief hoàn hảo ngay từ đầu. Cứ chia sẻ những gì bạn
-                đang có, DPI Media sẽ giúp bạn “gỡ rối” và đề xuất cấu trúc
+                đang có, DPI MEDIA sẽ giúp bạn “gỡ rối” và đề xuất cấu trúc
                 video phù hợp.
             </p>
             </div>
         </div>
 
-        {/* CỘT PHẢI: form + social */}
         <div className="flex flex-col gap-4">
-            {/* CARD FORM */}
             <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,.12),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(255,138,26,.20),transparent_55%),rgba(0,0,0,.85)] p-6 md:p-7 shadow-[0_18px_60px_rgba(0,0,0,.85)]">
             <div className="relative">
                 <h3 className="text-base md:text-lg font-semibold text-white">
@@ -180,7 +173,7 @@ return (
                 tham khảo
                 </h3>
                 <p className="mt-2 text-xs md:text-sm text-white/75">
-                Chỉ cần một email liên hệ, DPI Media sẽ gửi tài liệu tóm tắt
+                Chỉ cần một email liên hệ, DPI MEDIA sẽ gửi tài liệu tóm tắt
                 kèm vài case study phù hợp với ngành hàng của bạn.
                 </p>
 
@@ -222,17 +215,16 @@ return (
                 </form>
 
                 <p className="mt-3 text-[11px] text-white/50">
-                Bằng việc để lại email, bạn đồng ý cho DPI Media liên hệ lại
+                Bằng việc để lại email, bạn đồng ý cho DPI MEDIA liên hệ lại
                 về dịch vụ quay – dựng – livestream. Không spam, không bán
                 dữ liệu.
                 </p>
             </div>
             </div>
 
-            {/* CARD SOCIAL */}
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 md:p-6 flex flex-col items-center text-center">
             <p className="text-xs uppercase tracking-wide text-white/55">
-                Theo dõi DPI Media
+                Theo dõi DPI MEDIA
             </p>
             <p className="mt-1 text-sm text-white/80">
                 Hậu trường, tips dựng hình & dự án mới được cập nhật thường
@@ -240,12 +232,11 @@ return (
             </p>
 
             <div className="mt-4 flex items-center justify-center gap-4">
-                {/* Facebook */}
                 <a
                 href="https://www.facebook.com/Dpistudio.vn?locale=vi_VN"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Facebook DPI Media"
+                aria-label="Facebook DPI MEDIA"
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-white/8 text-white/80 transition-colors hover:bg-white/15 hover:text-[#1877F2]"
                 >
                 <svg
@@ -258,12 +249,11 @@ return (
                 </svg>
                 </a>
 
-                {/* YouTube */}
                 <a
                 href="https://www.youtube.com/@DPIMedia"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="YouTube DPI Media"
+                aria-label="YouTube DPI MEDIA"
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-white/8 text-white/80 transition-colors hover:bg-white/15 hover:text-[#FF0000]"
                 >
                 <svg
@@ -276,12 +266,11 @@ return (
                 </svg>
                 </a>
 
-                {/* Zalo */}
                 <a
                 href="https://zalo.me/0365701415"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Zalo DPI Media"
+                aria-label="Zalo DPI MEDIA"
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-white/8 text-white/80 transition-colors hover:bg-white/15 hover:text-[#0068FF]"
                 >
                 <svg

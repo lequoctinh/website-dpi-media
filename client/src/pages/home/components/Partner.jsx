@@ -50,8 +50,8 @@ useEffect(() => {
         setLoading(true);
         const res = await api.get("/partners", {
         params: {
-            status: "hien", // chỉ lấy đang hiển thị
-            home: 1,        // chỉ logo bật show_on_home
+            status: "hien", 
+            home: 1,        
         },
         });
 
@@ -73,7 +73,6 @@ useEffect(() => {
 
 const hasData = useMemo(() => items.length > 0, [items.length]);
 
-// Chia items thành các "trang" logo
 const pages = useMemo(() => {
     if (!items.length) return [];
     const chunks = [];
@@ -83,7 +82,6 @@ const pages = useMemo(() => {
     return chunks;
 }, [items]);
 
-// Lấy vài industry để show chip bên trên (nếu có)
 const industries = useMemo(() => {
     const s = new Set();
     items.forEach((it) => {
@@ -92,28 +90,24 @@ const industries = useMemo(() => {
     return Array.from(s).slice(0, 5);
 }, [items]);
 
-// Auto chuyển trang mượt
 useEffect(() => {
     if (!pages.length) return;
-    // reset page nếu data mới ít hơn
     if (page >= pages.length) setPage(0);
 
     const timer = setInterval(() => {
     setPage((prev) => (prev + 1) % pages.length);
-    }, 4800); // ~4.8s đổi trang
+    }, 4800);
 
     return () => clearInterval(timer);
 }, [pages.length, page]);
 
 return (
     <section className="relative bg-black py-16">
-    {/* Glow nền nhẹ cho hợp các section khác */}
     <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_50%_0%,rgba(255,255,255,0.12),transparent_60%)]"
     />
     <div className="relative mx-auto max-w-7xl px-4">
-        {/* Header – giữ nguyên theo yêu cầu */}
         <div className="mb-10 text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -122,16 +116,17 @@ return (
 
         <h2 className="mt-4 text-2xl font-bold text-white md:text-3xl">
             Đối tác đã đồng hành cùng{" "}
-            <span className="text-white/70">DPI Media</span>
+            <span className="text-white/70">DPI MEDIA</span>
         </h2>
         <p className="mt-2 text-sm text-white/70 max-w-xl mx-auto">
             Đơn vị sản xuất nội dung, thương hiệu, doanh nghiệp ở đa dạng lĩnh vực
-            đã lựa chọn DPI Media cho các chiến dịch truyền thông, TVC, livestream
+            đã lựa chọn DPI MEDIA cho các chiến dịch truyền thông, TVC, livestream
             và nội dung số.
         </p>
+        <div className="mx-auto mt-4 mb-2 h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" />
+
         </div>
 
-        {/* Loading / empty state */}
         {loading ? (
         <div className="rounded-3xl border border-white/12 bg-black/60 px-4 py-10 text-center text-sm text-white/60">
             Đang tải danh sách đối tác…
@@ -153,18 +148,16 @@ return (
             px-5 py-6 md:px-8 md:py-8
             "
         >
-            {/* Top row: content + stats + chip ngành */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3 text-left max-w-xl">
                 <h3 className="text-lg font-semibold text-white md:text-xl">
-                Thương hiệu tin tưởng DPI Media
+                Thương hiệu tin tưởng DPI MEDIA
                 </h3>
                 <p className="text-sm text-white/70">
                 Chúng tôi đồng hành cùng doanh nghiệp trong việc xây dựng hình ảnh,
                 kể câu chuyện thương hiệu và lan tỏa thông điệp qua video, hình ảnh,
                 TVC, livestream và nội dung digital.
                 </p>
-
                 {industries.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-1">
                     {industries.map((ind) => (
@@ -200,7 +193,6 @@ return (
             </div>
             </div>
 
-            {/* Slider dạng "trang" – fade mượt, không chạy ngang */}
             <div className="space-y-4">
             <div className="relative overflow-hidden min-h-[120px] md:min-h-[150px]">
                 <AnimatePresence mode="wait">
@@ -289,7 +281,7 @@ return (
             </div>
 
             <p className="mt-5 text-xs text-white/45 text-left">
-            * Danh sách trên chỉ là một phần đối tác đã hợp tác cùng DPI Media ở
+            * Danh sách trên chỉ là một phần đối tác đã hợp tác cùng DPI MEDIA ở
             nhiều định dạng: TVC, viral clip, social video, livestream, sự kiện
             và các hoạt động truyền thông khác.
             </p>
