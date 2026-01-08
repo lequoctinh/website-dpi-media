@@ -1,17 +1,14 @@
-
 const express = require("express");
-const pool = require("../db"); 
+const pool = require("../db");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
 
+// 1. Cấu hình lưu trữ ảnh
 const uploadDir = path.join(__dirname, "../uploads/news");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const MAX_MB = Number(process.env.UPLOAD_NEWS_MAX_MB || 8);
-const MAX_BYTES = MAX_MB * 1024 * 1024;
 
 const storage = multer.diskStorage({
 destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -22,29 +19,12 @@ filename: (_req, file, cb) => {
 },
 });
 
-const fileFilter = (_req, file, cb) => {
-const ok = /image\/(png|jpe?g|webp|gif|svg\+xml)/i.test(file.mimetype);
-cb(ok ? null : new Error("Chỉ cho phép file ảnh"), ok);
-};
-
 const upload = multer({
 storage,
-fileFilter,
-limits: { fileSize: MAX_BYTES },
+limits: { fileSize: 8 * 1024 * 1024 }, 
 });
 
-const singleImage = (field) => (req, res, next) =>
-upload.single(field)(req, res, (err) => {
-    if (!err) return next();
-    if (err instanceof multer.MulterError) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(413).json({ message: `Ảnh quá lớn (tối đa ${MAX_MB}MB)` });
-    }
-    return res.status(400).json({ message: `Lỗi upload: ${err.code}` });
-    }
-    return res.status(400).json({ message: err.message || "Lỗi upload" });
-});
-
+// 2. Hàm bổ trợ (Helpers)
 const makeSlug = (s) =>
 String(s || "")
     .toLowerCase()
@@ -57,8 +37,7 @@ async function uniqueSlug(baseSlug, excludeId = null) {
 let slug = baseSlug || String(Date.now());
 let i = 1;
 while (i <= 50) {
-    const sql =
-    "SELECT id FROM bai_viet WHERE slug=? " + (excludeId ? "AND id<>?" : "") + " LIMIT 1";
+    const sql = "SELECT id FROM bai_viet WHERE slug=? " + (excludeId ? "AND id<>?" : "") + " LIMIT 1";
     const [rows] = await pool.query(sql, excludeId ? [slug, excludeId] : [slug]);
     if (!rows.length) return slug;
     slug = `${baseSlug}-${i++}`;
@@ -66,9 +45,12 @@ while (i <= 50) {
 return `${baseSlug}-${Date.now()}`;
 }
 
+// Mapper để đồng nhất dữ liệu trả về cho Frontend
 function mapArticleRow(r) {
 return {
     id: r.id,
+    categoryId: r.category_id,
+    categoryName: r.category_name, 
     title: r.tieu_de,
     slug: r.slug,
     thumbnail: r.hinh_anh,
@@ -76,6 +58,8 @@ return {
     content: r.noi_dung,
     author: r.tac_gia,
     status: r.trang_thai,
+    isFeatured: !!r.is_featured,
+    metaDescription: r.meta_description,
     views: r.luot_xem,
     published_at: r.ngay_dang,
     created_at: r.created_at,
@@ -83,39 +67,37 @@ return {
 };
 }
 
+// 3. API Routes
+
+// --- Lấy danh sách (Có phân trang, lọc theo trạng thái, tìm kiếm, lọc theo category) ---
 router.get("/", async (req, res) => {
 try {
-    let { status = "xuat_ban", q, page = 1, limit = 12 } = req.query;
+    let { status, q, categoryId, isFeatured, page = 1, limit = 12 } = req.query;
     page = Math.max(1, Number(page) || 1);
     limit = Math.min(100, Math.max(1, Number(limit) || 12));
-    const off = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
     const cond = [];
     const params = [];
 
-    if (status) {
-    cond.push("trang_thai=?");
-    params.push(status);
-    }
-    if (q) {
-    cond.push("(tieu_de LIKE ? OR mo_ta_ngan LIKE ?)");
-    params.push(`%${q}%`, `%${q}%`);
-    }
+    if (status) { cond.push("bv.trang_thai = ?"); params.push(status); }
+    if (q) { cond.push("(bv.tieu_de LIKE ? OR bv.mo_ta_ngan LIKE ?)"); params.push(`%${q}%`, `%${q}%`); }
+    if (categoryId) { cond.push("bv.category_id = ?"); params.push(categoryId); }
+    if (isFeatured !== undefined) { cond.push("bv.is_featured = ?"); params.push(isFeatured === 'true' ? 1 : 0); }
 
     const where = cond.length ? `WHERE ${cond.join(" AND ")}` : "";
-    const [rows] = await pool.query(
-    `SELECT id,tieu_de,slug,hinh_anh,mo_ta_ngan,noi_dung,tac_gia,trang_thai,ngay_dang,luot_xem,created_at,updated_at
-    FROM bai_viet
-    ${where}
-    ORDER BY COALESCE(ngay_dang, created_at) DESC
-    LIMIT ? OFFSET ?`,
-    [...params, limit, off]
-    );
 
-    const [cnt] = await pool.query(
-    `SELECT COUNT(*) AS total FROM bai_viet ${where}`,
-    params
-    );
+    const sql = `
+    SELECT bv.*, c.name as category_name 
+    FROM bai_viet bv
+    LEFT JOIN category c ON bv.category_id = c.id
+    ${where}
+    ORDER BY bv.is_featured DESC, COALESCE(bv.ngay_dang, bv.created_at) DESC
+    LIMIT ? OFFSET ?
+    `;
+
+    const [rows] = await pool.query(sql, [...params, limit, offset]);
+    const [cnt] = await pool.query(`SELECT COUNT(*) AS total FROM bai_viet bv ${where}`, params);
 
     res.json({
     data: rows.map(mapArticleRow),
@@ -129,16 +111,18 @@ try {
 }
 });
 
+// --- Lấy chi tiết (Dùng cho trang bài viết đơn phía Client) ---
 router.get("/:idOrSlug", async (req, res) => {
 try {
     const { idOrSlug } = req.params;
     const isId = /^\d+$/.test(idOrSlug);
-    const [rows] = await pool.query(
-    `SELECT id,tieu_de,slug,hinh_anh,mo_ta_ngan,noi_dung,tac_gia,trang_thai,ngay_dang,luot_xem,created_at,updated_at
-    FROM bai_viet
-    WHERE ${isId ? "id=?" : "slug=?"} LIMIT 1`,
-    [idOrSlug]
-    );
+    const sql = `
+    SELECT bv.*, c.name as category_name 
+    FROM bai_viet bv
+    LEFT JOIN category c ON bv.category_id = c.id
+    WHERE bv.${isId ? "id=?" : "slug=?"} LIMIT 1
+    `;
+    const [rows] = await pool.query(sql, [idOrSlug]);
     if (!rows.length) return res.status(404).json({ message: "Không tìm thấy bài viết" });
     res.json(mapArticleRow(rows[0]));
 } catch (e) {
@@ -147,139 +131,106 @@ try {
 }
 });
 
-router.post("/", singleImage("hinh_anh"), async (req, res) => {
+// --- Tạo bài viết mới ---
+router.post("/", upload.single("hinh_anh"), async (req, res) => {
 try {
-    const { tieu_de, mo_ta_ngan, noi_dung, tac_gia, trang_thai } = req.body;
-    if (!tieu_de) return res.status(400).json({ message: "Thiếu tiêu đề" });
+    const { tieu_de, mo_ta_ngan, noi_dung, tac_gia, trang_thai, category_id, is_featured, meta_description } = req.body;
+    if (!tieu_de) return res.status(400).json({ message: "Thiếu tiêu đề bài viết" });
 
     const status = trang_thai === "xuat_ban" ? "xuat_ban" : "nhap";
-    const baseSlug = makeSlug(tieu_de);
-    const slug = await uniqueSlug(baseSlug);
+    const slug = await uniqueSlug(makeSlug(tieu_de));
     const imgPath = req.file ? `/uploads/news/${req.file.filename}` : null;
 
-    const [rs] = await pool.query(
-    `INSERT INTO bai_viet
-    (tieu_de, slug, hinh_anh, mo_ta_ngan, noi_dung, tac_gia, trang_thai, ngay_dang)
-    VALUES (?,?,?,?,?,?,?, CASE WHEN ?='xuat_ban' THEN NOW() ELSE NULL END)`,
-    [tieu_de, slug, imgPath, mo_ta_ngan || null, noi_dung || null, tac_gia || null, status, status]
-    );
+    const sql = `
+    INSERT INTO bai_viet 
+    (category_id, tieu_de, slug, hinh_anh, mo_ta_ngan, noi_dung, tac_gia, trang_thai, is_featured, meta_description, ngay_dang)
+    VALUES (?,?,?,?,?,?,?,?,?,?, CASE WHEN ?='xuat_ban' THEN NOW() ELSE NULL END)
+    `;
+    
+    const [rs] = await pool.query(sql, [
+    category_id || null, 
+    tieu_de, 
+    slug, 
+    imgPath, 
+    mo_ta_ngan || null, 
+    noi_dung || null, 
+    tac_gia || null, 
+    status, 
+    is_featured === 'true' || is_featured == 1 ? 1 : 0,
+    meta_description || null,
+    status
+    ]);
 
-    const [rows] = await pool.query(
-    `SELECT id,tieu_de,slug,hinh_anh,mo_ta_ngan,noi_dung,tac_gia,trang_thai,ngay_dang,luot_xem,created_at,updated_at
-    FROM bai_viet WHERE id=? LIMIT 1`,
-    [rs.insertId]
-    );
-    res.json({ ...mapArticleRow(rows[0]), message: "Tạo bài viết thành công" });
+    res.status(201).json({ id: rs.insertId, message: "Tạo bài viết thành công" });
 } catch (e) {
     console.error(e);
-    res.status(500).json({ message: "Lỗi tạo bài viết" });
+    res.status(500).json({ message: "Lỗi server khi tạo bài viết" });
 }
 });
 
-router.put("/:id", singleImage("hinh_anh"), async (req, res) => {
+// --- Cập nhật bài viết ---
+router.put("/:id", upload.single("hinh_anh"), async (req, res) => {
 try {
     const { id } = req.params;
-    const { tieu_de, mo_ta_ngan, noi_dung, tac_gia, trang_thai } = req.body;
+    const { tieu_de, mo_ta_ngan, noi_dung, tac_gia, trang_thai, category_id, is_featured, meta_description } = req.body;
 
-    const [oldRows] = await pool.query(
-    "SELECT tieu_de,hinh_anh,trang_thai,ngay_dang FROM bai_viet WHERE id=? LIMIT 1",
-    [id]
-    );
-    if (!oldRows.length) return res.status(404).json({ message: "Không tìm thấy bài viết" });
+    const [oldRows] = await pool.query("SELECT hinh_anh, tieu_de FROM bai_viet WHERE id=?", [id]);
+    if (!oldRows.length) return res.status(404).json({ message: "Bài viết không tồn tại" });
     const old = oldRows[0];
-
-    const status =
-    trang_thai === "xuat_ban" ? "xuat_ban" : trang_thai === "nhap" ? "nhap" : old.trang_thai;
-    const baseSlug = makeSlug(tieu_de || old.tieu_de);
-    const slug = await uniqueSlug(baseSlug, id);
 
     let imgPath = old.hinh_anh;
     if (req.file) {
     imgPath = `/uploads/news/${req.file.filename}`;
     if (old.hinh_anh) {
-        const oldFile = path.join(__dirname, "..", old.hinh_anh.replace(/^\//, ""));
-        if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
+        const oldPath = path.join(__dirname, "..", old.hinh_anh);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     }
     }
 
-    await pool.query(
-    `UPDATE bai_viet
-    SET tieu_de=?, slug=?, hinh_anh=?, mo_ta_ngan=?, noi_dung=?, tac_gia=?, trang_thai=?,
-        ngay_dang = CASE WHEN ?='xuat_ban' AND ngay_dang IS NULL THEN NOW() ELSE ngay_dang END,
-        updated_at=NOW()
-    WHERE id=?`,
-    [
-        tieu_de || old.tieu_de,
-        slug,
-        imgPath,
-        mo_ta_ngan || null,
-        noi_dung || null,
-        tac_gia || null,
-        status,
-        status,
-        id,
-    ]
-    );
+    const slug = tieu_de && tieu_de !== old.tieu_de ? await uniqueSlug(makeSlug(tieu_de), id) : undefined;
 
-    const [rows] = await pool.query(
-    `SELECT id,tieu_de,slug,hinh_anh,mo_ta_ngan,noi_dung,tac_gia,trang_thai,ngay_dang,luot_xem,created_at,updated_at
-    FROM bai_viet WHERE id=? LIMIT 1`,
-    [id]
-    );
-    res.json({ ...mapArticleRow(rows[0]), message: "Cập nhật bài viết thành công" });
+    const sql = `
+    UPDATE bai_viet SET 
+        category_id=?, tieu_de=?, ${slug ? "slug=?," : ""} hinh_anh=?, 
+        mo_ta_ngan=?, noi_dung=?, tac_gia=?, trang_thai=?, 
+        is_featured=?, meta_description=?, updated_at=NOW()
+    WHERE id=?
+    `;
+
+    const params = [
+    category_id || null,
+    tieu_de || old.tieu_de,
+    ...(slug ? [slug] : []),
+    imgPath,
+    mo_ta_ngan || null,
+    noi_dung || null,
+    tac_gia || null,
+    trang_thai || 'nhap',
+    is_featured === 'true' || is_featured == 1 ? 1 : 0,
+    meta_description || null,
+    id
+    ];
+
+    await pool.query(sql, params);
+    res.json({ message: "Cập nhật thành công" });
 } catch (e) {
     console.error(e);
     res.status(500).json({ message: "Lỗi cập nhật bài viết" });
 }
 });
 
-router.patch("/:id/publish", async (req, res) => {
-try {
-    const { id } = req.params;
-    await pool.query(
-    "UPDATE bai_viet SET trang_thai='xuat_ban', ngay_dang=COALESCE(ngay_dang, NOW()), updated_at=NOW() WHERE id=?",
-    [id]
-    );
-    const [rows] = await pool.query(
-    `SELECT id,tieu_de,slug,hinh_anh,mo_ta_ngan,noi_dung,tac_gia,trang_thai,ngay_dang,luot_xem,created_at,updated_at
-    FROM bai_viet WHERE id=? LIMIT 1`,
-    [id]
-    );
-    res.json({ ...mapArticleRow(rows[0]), message: "Đã xuất bản bài viết" });
-} catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "Lỗi xuất bản" });
-}
-});
-
-router.patch("/:id/view", async (req, res) => {
-try {
-    const { id } = req.params;
-    await pool.query("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id=?", [id]);
-    res.json({ message: "OK" });
-} catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "Lỗi cập nhật lượt xem" });
-}
-});
-
+// --- Xóa bài viết ---
 router.delete("/:id", async (req, res) => {
 try {
-    const { id } = req.params;
-
-    const [rows] = await pool.query("SELECT hinh_anh FROM bai_viet WHERE id=?", [id]);
-    if (!rows.length) return res.status(404).json({ message: "Không tìm thấy bài viết" });
-
-    if (rows[0].hinh_anh) {
-    const file = path.join(__dirname, "..", rows[0].hinh_anh.replace(/^\//, ""));
+    const [rows] = await pool.query("SELECT hinh_anh FROM bai_viet WHERE id=?", [req.params.id]);
+    if (rows.length && rows[0].hinh_anh) {
+    const file = path.join(__dirname, "..", rows[0].hinh_anh);
     if (fs.existsSync(file)) fs.unlinkSync(file);
     }
-
-    await pool.query("DELETE FROM bai_viet WHERE id=?", [id]);
-    res.json({ message: "Đã xóa bài viết" });
+    await pool.query("DELETE FROM bai_viet WHERE id=?", [req.params.id]);
+    res.json({ message: "Đã xóa bài viết vĩnh viễn" });
 } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "Lỗi xóa bài viết" });
+    res.status(500).json({ message: "Lỗi khi xóa bài viết" });
 }
 });
 
