@@ -126,7 +126,7 @@ return (
                 </p>
 
                 <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
-                    <span className="text-[10px] font-medium text-zinc-500 italic uppercase">DPI Media Studio</span>
+                    <span className="text-[10px] font-medium text-zinc-500 italic uppercase">DPI MEDIA </span>
                     <Link 
                     to={`/tin-tuc/${item.slug}`} 
                     className="
