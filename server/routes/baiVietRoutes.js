@@ -69,7 +69,6 @@ return {
 
 // 3. API Routes
 
-// --- Lấy danh sách (Có phân trang, lọc theo trạng thái, tìm kiếm, lọc theo category) ---
 router.get("/", async (req, res) => {
 try {
     let { status, q, categoryId, isFeatured, page = 1, limit = 12 } = req.query;
